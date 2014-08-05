@@ -14,7 +14,7 @@ The project contains code to:
 
 * Take a set number of pictures with the Kinect camera
 * Train a machine learning model to detect deer within a set of pictures
-* Use the connect to determine if a picture contains a deer
+* Use the Kinect to determine if a picture contains a deer
 
 For more information on the project, [read my blog posts on the
 project](#)
