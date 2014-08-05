@@ -103,12 +103,11 @@ software is available from http://commons.apache.org/cli
 This links to the Apache Commons Math, which is licensed under the
 Apache License, Version 2.0. The license can be downloaded from
 http://www.apache.org/licenses/LICENSE-2.0.html. The source code for this
-software is available from http://commons.apache.org/proper/commons-math/
+software is available from http://commons.apache.org/proper/commons-math
 
-### OpenKinect project libfreenect Java Wrappers
+### BoofCV 
 
-This work includes an unmodified, compiled JAR of the libfreenect Java wrappers, 
-which is licensed under the Apache License, Version 2.0. The license can
-be downloaded from https://github.com/OpenKinect/libfreenect/blob/master/APACHE20.
-The source code for this software is available from 
-https://github.com/OpenKinect/libfreenect
+This links to BoofCV, which is licensed under the Apache License,
+Version 2.0. The license can be downloaded from 
+http://www.apache.org/licenses/LICENSE-2.0.txt. The source code for this
+software is available from https://github.com/lessthanoptimal/BoofCV
