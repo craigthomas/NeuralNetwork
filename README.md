@@ -34,6 +34,7 @@ Simply copy the source files to a directory of your choice. In addition
 to the source, you will need the following required software packages:
 
 * [Java JDK 7](http://www.oracle.com/technetwork/java/javase/downloads/index.html) 1.7.0 u51 or later
+* [OpenKinect libfreenect](http://openkinect.org/wiki/Getting_Started)
 
 To build the project, switch to the root of the source directory, and
 type:
