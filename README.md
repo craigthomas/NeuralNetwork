@@ -1,6 +1,6 @@
 # ML Deer Detector
 
-[![Build Status](https://travis-ci.org/craigthomas/MLDeerDetector.svg?branch=master)](https://travis-ci.org/craigthomas/MLDeerDetector)
+[![Build Status](https://travis-ci.org/craigthomas/DeerDetector.svg?branch=master)](https://travis-ci.org/craigthomas/MLDeerDetector)
 
 ## What is it?
 
