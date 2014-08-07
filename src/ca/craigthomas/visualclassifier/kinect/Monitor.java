@@ -27,31 +27,15 @@ public class Monitor {
     }
     
     /**
-     * Takes a snapshot from both the RGB video on the Kinect.
+     * Takes a snapshot from the IR or RGB camera. The type taken depends on
+     * the format specified in <code>videoFormat</code>. Returns a single
+     * VideoFrame with the snapshot information contained within it.
      * 
      * @throws InterruptedException
+     * @return a single frame photo
      */
-    public VideoFrame takeSnapshot() throws InterruptedException {
-        mDevice.setVideoFormat(VideoFormat.RGB);
-        mVideoHandler = new VideoFrameHandler();
-        mDevice.setLed(LedStatus.RED);
-        mDevice.startVideo(mVideoHandler);
-        while (mVideoHandler.getVideoFrame() == null) {
-            Thread.sleep(100);
-        }
-        VideoFrame videoFrame = mVideoHandler.getVideoFrame();
-        mDevice.stopVideo();
-        mDevice.setLed(LedStatus.OFF);        
-        return videoFrame;
-    }
-    
-    /**
-     * Takes a snapshot from the infrared video on the Kinect.
-     * 
-     * @throws InterruptedException
-     */
-    public VideoFrame takeIRSnapshot() throws InterruptedException {
-        mDevice.setVideoFormat(VideoFormat.IR_8BIT);
+    public VideoFrame takeSnapshot(VideoFormat videoFormat) throws InterruptedException {
+        mDevice.setVideoFormat(videoFormat);
         mVideoHandler = new VideoFrameHandler();
         mDevice.setLed(LedStatus.RED);
         mDevice.startVideo(mVideoHandler);

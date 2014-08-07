@@ -23,6 +23,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.openkinect.freenect.VideoFormat;
 
 import ca.craigthomas.visualclassifier.kinect.Monitor;
 import ca.craigthomas.visualclassifier.kinect.VideoFrame;
@@ -107,8 +108,7 @@ public class Runner {
     }
     
     public static void main(String[] argv) throws InterruptedException, IOException {
-        VideoFrame videoFrame;
-        boolean irCamera = false;
+        VideoFormat videoFormat = VideoFormat.RGB;
         DateFormat dateFormat = new SimpleDateFormat(TIMESTAMP_CONVERSION);
         int numPictures = 1;
         int delay = 1;
@@ -130,14 +130,13 @@ public class Runner {
         }
         
         if (commandLine.hasOption(IR_OPTION)) {
-            irCamera = true;
+            videoFormat = VideoFormat.IR_8BIT;
         }
 
         if (commandLine.hasOption(PATH_OPTION)) {
             path = commandLine.getOptionValue(PATH_OPTION);
         }
         
-        // Make sure the path specified is valid
         File directory = new File(path);
         if (!directory.isDirectory()) {
             LOGGER.log(Level.SEVERE, "Error: path [" + path + "] is not a directory");
@@ -150,11 +149,7 @@ public class Runner {
         
         for (int counter = 0; counter < numPictures; counter++) {
             LOGGER.log(Level.INFO, "Taking snapshot (" + (counter+1) + " of " + numPictures + ")");
-            if (irCamera) {
-                videoFrame = mFreenectMonitor.takeIRSnapshot();
-            } else {
-                videoFrame = mFreenectMonitor.takeSnapshot();
-            }
+            VideoFrame videoFrame = mFreenectMonitor.takeSnapshot(videoFormat);
             BufferedImage snapshot = videoFrame.getBufferedImage();
             String filename = dateFormat.format(new Date()) + ".jpg";
             File file = new File(directory, filename);
