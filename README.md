@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/craigthomas/DeerDetector.svg?branch=master)](https://travis-ci.org/craigthomas/MLDeerDetector)[![Coverage Status](https://coveralls.io/repos/craigthomas/DeerDetector/badge.png)](https://coveralls.io/r/craigthomas/DeerDetector)
 
+
 ## What is it?
 
 This project represents a machine learning algorithm and support programs
@@ -18,6 +19,7 @@ The project contains code to:
 
 For more information on the project, [read my blog posts on the
 project](#)
+
 
 ## License
 
@@ -63,7 +65,7 @@ page for more detailed installation instructions.
 There are several options available for the program. Running the jar
 with the `-h` option will display a helpful description of the options:
 
-    java -jar build/libs/nnclassifier-0.1.jar -h
+    java -jar build/libs/visualclassifier-0.1.jar -h
 
 ### Collecting Data 
 
@@ -71,18 +73,27 @@ To take pictures of various objects, you can specify the number of pictures
 to take as well as a time delay between successive pictures. For example,
 to take 10 pictures:
 
-    java -jar build/libs/nnclassifier-0.1.jar -n 10
+    java -jar build/libs/visualclassifier-0.1.jar -n 10
 
 To take 10 pictures with a delay of 5 seconds between each:
 
-     java -jar build/libs/nnclassifier-0.1.jar -n 10 -d 5
+    java -jar build/libs/visualclassifier-0.1.jar -n 10 -d 5
+
+To take a picture using the infrared camera:
+
+    java -jar build/libs/visualclassifier-0.1.jar -i
+
+Saving files to a different path:
+
+    java -jar build/libs/visualclassifier-0.1.jar -p /path/to/save/to
 
 
-## Current Status - August 3, 2014
+## Current Status - August 7, 2014
 
 ### Operational
 
 - Taking pictures with a delay and saving them as JPG files
+- Taking pictures using the IR camera and saving them as JPG files
 
 ### Yet to be Implemented
 
