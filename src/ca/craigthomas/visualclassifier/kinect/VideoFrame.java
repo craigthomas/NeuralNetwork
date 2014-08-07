@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
 
 import org.openkinect.freenect.FrameMode;
+import org.openkinect.freenect.VideoFormat;
 
 /**
  * Stores a single frame of data from a Kinect stream. 
@@ -37,17 +38,12 @@ public class VideoFrame {
     }
     
     /**
-     * Turn the data in the ByteBuffer into a BufferedImage. Store the results
-     * of the BufferedImage so that we don't have to recalculate it again.
+     * Returns a buffered image of the ByteBuffer, assumed to be an RGB
+     * image.
      * 
-     * @return a BufferedImage of the ByteBuffer contents
+     * @return the RGB image
      */
-    public BufferedImage getBufferedImage() {
-        // Return the already generated BufferedImage if one exists
-        if (mBufferedImage != null) {
-            return mBufferedImage;
-        }
-        
+    private BufferedImage getRGBBufferedImage() {
         int width = sFrameMode.width;
         int height = sFrameMode.height;
         
@@ -68,6 +64,71 @@ public class VideoFrame {
                 mBufferedImage.setRGB(x, y, new Color(r, g, b).getRGB());
             }
         }
+        return mBufferedImage;        
+    }
+    
+    /**
+     * Returns a buffered image of the ByteBuffer, assumed to be an 8-bit
+     * greyscale image taken from the IR camera.
+     * 
+     * @return the IR image
+     */
+    private BufferedImage getIR8BITBufferedImage() {
+        int width = sFrameMode.width;
+        int height = sFrameMode.height;
+        
+        // Convert the ByteBuffer into a ByteArrayInputStream for easier access
+        byte[] data = new byte[sByteBuffer.remaining()];
+        sByteBuffer.get(data);
+        ByteArrayInputStream stream = new ByteArrayInputStream(data);
+        
+        mBufferedImage = new BufferedImage(width, height, 
+                BufferedImage.TYPE_BYTE_GRAY);
+        
+        // Loop through the image data and write it into the BufferedImage
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int g = stream.read();
+                mBufferedImage.setRGB(x, y, new Color(g, g, g).getRGB());
+            }
+        }
+        return mBufferedImage;                
+    }
+    
+    /**
+     * Turn the data in the ByteBuffer into a BufferedImage. Store the results
+     * of the BufferedImage so that we don't have to recalculate it again.
+     * 
+     * @return a BufferedImage of the ByteBuffer contents
+     */
+    public BufferedImage getBufferedImage() {
+        // Return the already generated BufferedImage if one exists
+        if (mBufferedImage != null) {
+            return mBufferedImage;
+        }
+        
+        switch (sFrameMode.getVideoFormat()) {
+        case BAYER:
+            break;
+        case IR_10BIT:
+            break;
+        case IR_10BIT_PACKED:
+            break;
+        case IR_8BIT:
+            mBufferedImage = getIR8BITBufferedImage();
+            break;
+        case RGB:
+            mBufferedImage = getRGBBufferedImage();
+            break;
+        case YUV_RAW:
+            break;
+        case YUV_RGB:
+            break;
+        default:
+            mBufferedImage = null;
+            break;
+        }
+        
         return mBufferedImage;
     }
 

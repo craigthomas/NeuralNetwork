@@ -44,4 +44,23 @@ public class Monitor {
         mDevice.setLed(LedStatus.OFF);        
         return videoFrame;
     }
+    
+    /**
+     * Takes a snapshot from the infrared video on the Kinect.
+     * 
+     * @throws InterruptedException
+     */
+    public VideoFrame takeIRSnapshot() throws InterruptedException {
+        mDevice.setVideoFormat(VideoFormat.IR_8BIT);
+        mVideoHandler = new VideoFrameHandler();
+        mDevice.setLed(LedStatus.RED);
+        mDevice.startVideo(mVideoHandler);
+        while (mVideoHandler.getVideoFrame() == null) {
+            Thread.sleep(100);
+        }
+        VideoFrame videoFrame = mVideoHandler.getVideoFrame();
+        mDevice.stopVideo();
+        mDevice.setLed(LedStatus.OFF);        
+        return videoFrame;
+    }
 }

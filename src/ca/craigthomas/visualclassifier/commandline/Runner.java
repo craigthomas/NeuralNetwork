@@ -33,6 +33,7 @@ public class Runner {
     private static final String NUMBER_OPTION = "n";
     private static final String HELP_OPTION = "h";
     private static final String PATH_OPTION = "p";
+    private static final String IR_OPTION = "i";
     private static final String PROGRAM_NAME = "visualclassifier";
     private final static Logger LOGGER = Logger.getLogger(Runner.class.getName());
     private static final String TIMESTAMP_CONVERSION = "yyyy-MM-dd_HH-mm-ss";
@@ -44,6 +45,11 @@ public class Runner {
      */
     public static Options generateOptions() {
         Options options = new Options();
+        
+        @SuppressWarnings("static-access")
+        Option ir = OptionBuilder
+                .withDescription("takes images using the IR camera")
+                .create(IR_OPTION);
 
         @SuppressWarnings("static-access")
         Option delay = OptionBuilder
@@ -75,6 +81,7 @@ public class Runner {
         options.addOption(delay);
         options.addOption(path);
         options.addOption(number);
+        options.addOption(ir);
         return options;
     }
 
@@ -100,6 +107,8 @@ public class Runner {
     }
     
     public static void main(String[] argv) throws InterruptedException, IOException {
+        VideoFrame videoFrame;
+        boolean irCamera = false;
         DateFormat dateFormat = new SimpleDateFormat(TIMESTAMP_CONVERSION);
         int numPictures = 1;
         int delay = 1;
@@ -119,6 +128,10 @@ public class Runner {
         if (commandLine.hasOption(DELAY_OPTION)) {
             delay = Integer.parseInt(commandLine.getOptionValue(DELAY_OPTION));
         }
+        
+        if (commandLine.hasOption(IR_OPTION)) {
+            irCamera = true;
+        }
 
         if (commandLine.hasOption(PATH_OPTION)) {
             path = commandLine.getOptionValue(PATH_OPTION);
@@ -137,7 +150,11 @@ public class Runner {
         
         for (int counter = 0; counter < numPictures; counter++) {
             LOGGER.log(Level.INFO, "Taking snapshot (" + (counter+1) + " of " + numPictures + ")");
-            VideoFrame videoFrame = mFreenectMonitor.takeSnapshot();
+            if (irCamera) {
+                videoFrame = mFreenectMonitor.takeIRSnapshot();
+            } else {
+                videoFrame = mFreenectMonitor.takeSnapshot();
+            }
             BufferedImage snapshot = videoFrame.getBufferedImage();
             String filename = dateFormat.format(new Date()) + ".jpg";
             File file = new File(directory, filename);
