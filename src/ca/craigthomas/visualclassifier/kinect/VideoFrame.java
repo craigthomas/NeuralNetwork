@@ -10,7 +10,6 @@ import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
 
 import org.openkinect.freenect.FrameMode;
-import org.openkinect.freenect.VideoFormat;
 
 /**
  * Stores a single frame of data from a Kinect stream. 

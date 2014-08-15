@@ -69,23 +69,24 @@ with the `-h` option will display a helpful description of the options:
 
 ### Collecting Data 
 
+The `collect` sub-command allows to you capture images for training.
 To take pictures of various objects, you can specify the number of pictures
 to take as well as a time delay between successive pictures. For example,
 to take 10 pictures:
 
-    java -jar build/libs/visualclassifier-0.1.jar -n 10
+    java -jar build/libs/visualclassifier-0.1.jar collect -n 10
 
 To take 10 pictures with a delay of 5 seconds between each:
 
-    java -jar build/libs/visualclassifier-0.1.jar -n 10 -d 5
+    java -jar build/libs/visualclassifier-0.1.jar collect -n 10 -d 5
 
 To take a picture using the infrared camera:
 
-    java -jar build/libs/visualclassifier-0.1.jar -i
+    java -jar build/libs/visualclassifier-0.1.jar collect -i
 
 Saving files to a different path:
 
-    java -jar build/libs/visualclassifier-0.1.jar -p /path/to/save/to
+    java -jar build/libs/visualclassifier-0.1.jar collect -p /path/to/save/to
 
 
 ## Current Status - August 7, 2014
@@ -103,23 +104,73 @@ Saving files to a different path:
 
 ## Third Party Licenses and Attributions
 
-### Apache Commons CLI
+### args4j
 
-This links to the Apache Commons CLI, which is licensed under the 
-Apache License, Version 2.0. The license can be downloaded from
-http://www.apache.org/licenses/LICENSE-2.0.html. The source code for this
-software is available from http://commons.apache.org/cli
+The project makes use of the args4j command-line argument parser,
+which is available at https://github.com/kohsuke/args4j and is
+licensed under the following terms:
 
-### Apache Commons Math
+    Copyright (c) 2013 Kohsuke Kawaguchi and other contributors
 
-This links to the Apache Commons Math, which is licensed under the
-Apache License, Version 2.0. The license can be downloaded from
-http://www.apache.org/licenses/LICENSE-2.0.html. The source code for this
-software is available from http://commons.apache.org/proper/commons-math
+    Permission is hereby granted, free of charge, to any person obtaining a copy of
+    this software and associated documentation files (the "Software"), to deal in
+    the Software without restriction, including without limitation the rights to
+    use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+    of the Software, and to permit persons to whom the Software is furnished to do
+    so, subject to the following conditions:
+ 
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+### JBlas
+
+This project makes use of the jblas linear algebra library, which is
+available at https://github.com/mikiobraun/jblas and is licensed under 
+the following terms:
+
+    Copyright (c) 2009, Mikio L. Braun and contributors
+    All rights reserved.
+    
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are
+    met:
+    
+        * Redistributions of source code must retain the above copyright
+          notice, this list of conditions and the following disclaimer.
+    
+        * Redistributions in binary form must reproduce the above
+          copyright notice, this list of conditions and the following
+          disclaimer in the documentation and/or other materials provided
+          with the distribution.
+    
+        * Neither the name of the Technische Universität Berlin nor the
+          names of its contributors may be used to endorse or promote
+          products derived from this software without specific prior
+          written permission.
+    
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+    A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+    HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+    LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+    DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ### BoofCV 
 
-This links to BoofCV, which is licensed under the Apache License,
+This project makes use of BoofCV, which is licensed under the Apache License,
 Version 2.0. The license can be downloaded from 
 http://www.apache.org/licenses/LICENSE-2.0.txt. The source code for this
 software is available from https://github.com/lessthanoptimal/BoofCV

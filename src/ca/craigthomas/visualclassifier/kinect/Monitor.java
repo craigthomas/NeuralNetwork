@@ -34,13 +34,17 @@ public class Monitor {
      * @throws InterruptedException
      * @return a single frame photo
      */
-    public VideoFrame takeSnapshot(VideoFormat videoFormat) throws InterruptedException {
+    public VideoFrame takeSnapshot(VideoFormat videoFormat) {
         mDevice.setVideoFormat(videoFormat);
         mVideoHandler = new VideoFrameHandler();
         mDevice.setLed(LedStatus.RED);
         mDevice.startVideo(mVideoHandler);
         while (mVideoHandler.getVideoFrame() == null) {
-            Thread.sleep(100);
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                
+            }
         }
         VideoFrame videoFrame = mVideoHandler.getVideoFrame();
         mDevice.stopVideo();

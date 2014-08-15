@@ -17,10 +17,9 @@ repositories {
 
 dependencies {
     compile 'org.slf4j:slf4j-api:1.7.5'
-    compile 'org.apache.commons:commons-math3:3.2'
-    compile 'net.java.dev.jna:jna:4.1.0'
-    compile 'commons-cli:commons-cli:20040117.000000'
+    compile 'args4j:args4j:2.0.29'
     compile 'org.boofcv:openkinect:0.17'
+    compile 'org.jblas:jblas:1.2.3'
     testCompile 'junit:junit:4.11'
 }
 

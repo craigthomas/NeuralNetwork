@@ -4,160 +4,52 @@
  */
 package ca.craigthomas.visualclassifier.commandline;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import javax.imageio.ImageIO;
+import org.kohsuke.args4j.Argument;
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
+import org.kohsuke.args4j.spi.SubCommand;
+import org.kohsuke.args4j.spi.SubCommandHandler;
+import org.kohsuke.args4j.spi.SubCommands;
 
-import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.openkinect.freenect.VideoFormat;
-
-import ca.craigthomas.visualclassifier.kinect.Monitor;
-import ca.craigthomas.visualclassifier.kinect.VideoFrame;
-
+/**
+ * The Runner class parses the command line, and determines what actual command
+ * to run. The current commands supported are:
+ * 
+ *  collect - takes pictures using the camera or IR camera for training purposes
+ *  
+ * @author thomas
+ */
 public class Runner {
 
-    private static final String DELAY_OPTION = "d";
-    private static final String NUMBER_OPTION = "n";
-    private static final String HELP_OPTION = "h";
-    private static final String PATH_OPTION = "p";
-    private static final String IR_OPTION = "i";
-    private static final String PROGRAM_NAME = "visualclassifier";
-    private final static Logger LOGGER = Logger.getLogger(Runner.class.getName());
-    private static final String TIMESTAMP_CONVERSION = "yyyy-MM-dd_HH-mm-ss";
+    // The name of the generated class
+    private static final String PROGRAM_NAME = "visualclassifier.jar";
 
-    /**
-     * Generates the set of options for the command line option parser.
-     * 
-     * @return The options for the emulator
-     */
-    public static Options generateOptions() {
-        Options options = new Options();
-        
-        @SuppressWarnings("static-access")
-        Option ir = OptionBuilder
-                .withDescription("takes images using the IR camera")
-                .create(IR_OPTION);
-
-        @SuppressWarnings("static-access")
-        Option delay = OptionBuilder
-                .withArgName("delay")
-                .hasArg()
-                .withDescription("sets the delay in seconds between pictures (default 1)")
-                .create(DELAY_OPTION);
-
-        @SuppressWarnings("static-access")
-        Option number = OptionBuilder
-                .withArgName("number")
-                .hasArg()
-                .withDescription("the number of pictures to take (default 1)")
-                .create(NUMBER_OPTION);
-        
-        @SuppressWarnings("static-access")
-        Option path = OptionBuilder
-                .withArgName("path")
-                .hasArg()
-                .withDescription("location to store generated images in")
-                .create(PATH_OPTION);
-        
-
-        @SuppressWarnings("static-access")
-        Option help = OptionBuilder.withDescription(
-                "show this help message and exit").create(HELP_OPTION);
-
-        options.addOption(help);
-        options.addOption(delay);
-        options.addOption(path);
-        options.addOption(number);
-        options.addOption(ir);
-        return options;
-    }
-
-    /**
-     * Attempts to parse the command line options.
-     * 
-     * @param args
-     *            The set of arguments provided to the program
-     * @return A CommandLine object containing the parsed options
-     */
-    public static CommandLine parseCommandLineOptions(String[] args) {
-        CommandLineParser parser = new BasicParser();
-        try {
-            return parser.parse(generateOptions(), args);
-        } catch (ParseException e) {
-            System.err.println("Error: Command line parsing failed.");
-            System.err.println("Reason: " + e.getMessage());
-            HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp(PROGRAM_NAME, generateOptions());
-            System.exit(1);
-        }
-        return null;
-    }
+    // The set of sub-commands that the user can specify 
+    @Argument(handler=SubCommandHandler.class)
+    @SubCommands({
+        @SubCommand(name="collect", impl=CollectCommand.class),
+    })
+    Command command;
     
-    public static void main(String[] argv) throws InterruptedException, IOException {
-        VideoFormat videoFormat = VideoFormat.RGB;
-        DateFormat dateFormat = new SimpleDateFormat(TIMESTAMP_CONVERSION);
-        int numPictures = 1;
-        int delay = 1;
-        String path = "./";
-        CommandLine commandLine = parseCommandLineOptions(argv);
-        
-        if (commandLine.hasOption(HELP_OPTION)) {
-            HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp(PROGRAM_NAME, generateOptions());
-            return;
+    /**
+     * Parse the command line options and execute the specified command.
+     * 
+     * @param argv the command line arguments
+     * @throws IOException
+     * @throws CmdLineException
+     */
+    public static void main(String[] argv) throws IOException, CmdLineException {
+        Runner runner = new Runner();
+        CmdLineParser parser = new CmdLineParser(runner);
+        try {
+            parser.parseArgument(argv);
+            runner.command.execute();
+        } catch( CmdLineException e ) {
+            System.err.println(e.getMessage());
+            System.err.println("java -jar " + PROGRAM_NAME + " [options...] arguments...");
+            parser.printUsage(System.err);
         }
-
-        if (commandLine.hasOption(NUMBER_OPTION)) {
-            numPictures = Integer.parseInt(commandLine.getOptionValue(NUMBER_OPTION));
-        }
-        
-        if (commandLine.hasOption(DELAY_OPTION)) {
-            delay = Integer.parseInt(commandLine.getOptionValue(DELAY_OPTION));
-        }
-        
-        if (commandLine.hasOption(IR_OPTION)) {
-            videoFormat = VideoFormat.IR_8BIT;
-        }
-
-        if (commandLine.hasOption(PATH_OPTION)) {
-            path = commandLine.getOptionValue(PATH_OPTION);
-        }
-        
-        File directory = new File(path);
-        if (!directory.isDirectory()) {
-            LOGGER.log(Level.SEVERE, "Error: path [" + path + "] is not a directory");
-            return;
-        }
-        
-        delay = delay * 1000;        
-        Monitor mFreenectMonitor = new Monitor();
-        LOGGER.log(Level.INFO, "Taking " + numPictures + " picture(s)");
-        
-        for (int counter = 0; counter < numPictures; counter++) {
-            LOGGER.log(Level.INFO, "Taking snapshot (" + (counter+1) + " of " + numPictures + ")");
-            VideoFrame videoFrame = mFreenectMonitor.takeSnapshot(videoFormat);
-            BufferedImage snapshot = videoFrame.getBufferedImage();
-            String filename = dateFormat.format(new Date()) + ".jpg";
-            File file = new File(directory, filename);
-            ImageIO.write(snapshot, "jpg", file);
-            LOGGER.log(Level.INFO, "Sleeping for " + delay/1000 + " second(s)");
-            Thread.sleep(delay);
-        }
-        
-        LOGGER.log(Level.INFO, "Execution complete");
     }
 }
