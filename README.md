@@ -18,7 +18,7 @@ The project contains code to:
 * Use the Kinect to determine if a picture contains a deer
 
 For more information on the project, [read my blog posts on the
-project](#)
+project](http://craigthomas.ca/blog/2014/08/04/deer-detection-with-machine-learning-part-1/)
 
 
 ## License
