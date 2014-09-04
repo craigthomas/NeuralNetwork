@@ -139,6 +139,9 @@ public class NeuralNetwork {
          * @return the NeuralNetwork built by the builder
          */
         public NeuralNetwork build() {
+            if (mActivationFunction == null) {
+                mActivationFunction = new Sigmoid();
+            }
             return new NeuralNetwork(this);
         }
     }
