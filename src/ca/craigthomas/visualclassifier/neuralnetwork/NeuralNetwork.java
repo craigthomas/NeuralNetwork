@@ -9,6 +9,9 @@ import java.lang.IllegalArgumentException;
 
 import org.jblas.DoubleMatrix;
 
+import ca.craigthomas.visualclassifier.activation.IActivationFunction;
+import ca.craigthomas.visualclassifier.activation.Sigmoid;
+
 /**
  * Implements a neural network. Multiple layers can be specified in the 
  * neural network by setting the initial layerSizes value to a list of 
@@ -22,7 +25,8 @@ import org.jblas.DoubleMatrix;
 public class NeuralNetwork {
 
     private final List<Integer> mLayerSizes;
-    private List<DoubleMatrix> mThetas;
+    private final List<DoubleMatrix> mThetas;
+    private final IActivationFunction mActivationFunction;
     
     public static class Builder {
         
@@ -32,6 +36,7 @@ public class NeuralNetwork {
         private DoubleMatrix mOutputs;
         private double mLambda;
         private boolean mTrain;
+        private IActivationFunction mActivationFunction;
         
         /**
          * Constructs a neural network with the specified layers and their
@@ -117,6 +122,18 @@ public class NeuralNetwork {
         }
         
         /**
+         * Sets the activation function for the neural network. If none is 
+         * specified, the Sigmoid activation function is used by default.
+         * 
+         * @param activationFunction the activation function to use
+         * @return the builder for the neural network
+         */
+        public Builder activationFunction(IActivationFunction activationFunction) {
+            mActivationFunction = activationFunction;
+            return this;
+        }
+        
+        /**
          * The builder for the NeuralNetwork.
          * 
          * @return the NeuralNetwork built by the builder
@@ -129,6 +146,7 @@ public class NeuralNetwork {
     private NeuralNetwork(Builder builder) {
         mLayerSizes = builder.mLayerSizes;
         mThetas = builder.mThetas;
+        mActivationFunction = builder.mActivationFunction;
     }
     
     /**
@@ -156,7 +174,7 @@ public class NeuralNetwork {
         for (int layer = 0; layer < mThetas.size(); layer++) {
             DoubleMatrix ones = DoubleMatrix.ones(length, 1);
             DoubleMatrix activation = DoubleMatrix.concatHorizontally(ones, lastLayer);
-            lastLayer = Sigmoid.apply(activation.mmul(mThetas.get(layer).transpose()));
+            lastLayer = mActivationFunction.apply(activation.mmul(mThetas.get(layer).transpose()));
         }
         
         return lastLayer;

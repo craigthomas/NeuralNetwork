@@ -2,13 +2,13 @@
  * Copyright (C) 2014 Craig Thomas
  * This project uses an MIT style license - see LICENSE for details.
  */
-package ca.craigthomas.visualclassifier.neuralnetwork;
+package ca.craigthomas.visualclassifier.activation;
 
 import org.jblas.DoubleMatrix;
 import org.jblas.MatrixFunctions;
 
 /**
- * A static class used to calculate the sigmoid of all of the elements in a
+ * A class used to calculate the sigmoid of all of the elements in a
  * DoubleMatrix. The Sigmoid function is simply:
  * 
  *   S(t) =       1
@@ -17,12 +17,9 @@ import org.jblas.MatrixFunctions;
  *            
  * @author thomas
  */
-public class Sigmoid {
+public class Sigmoid implements IActivationFunction {
 
-    /**
-     * Make the constructor static so that it cannot be instantiated. 
-     */
-    private Sigmoid() {
+    public Sigmoid() {
     }
     
     /**
@@ -31,7 +28,7 @@ public class Sigmoid {
      * @param input the DoubleMatrix to use as input
      * @return the sigmoid value of the input matrix
      */
-    public static DoubleMatrix apply(DoubleMatrix input) {
+    public DoubleMatrix apply(DoubleMatrix input) {
         DoubleMatrix result = new DoubleMatrix().copy(input);
         DoubleMatrix ones = DoubleMatrix.ones(result.rows, result.columns);
         result.muli(-1);
@@ -46,7 +43,7 @@ public class Sigmoid {
      * @param input the double to use as input
      * @return the sigmoid value of the input
      */
-    public static double apply(double input) {
+    public double apply(double input) {
         return (1.0 / (1.0 + Math.exp(-input)));
     }
 }
