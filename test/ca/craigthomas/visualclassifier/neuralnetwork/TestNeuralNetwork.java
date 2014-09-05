@@ -209,4 +209,54 @@ public class TestNeuralNetwork {
 
         assertEquals(expectedCost, mNeuralNetwork.getCostNoRegularization(), 0.0005);
     }
+    
+    @Test
+    public void testGetMatrixNoBiasRemovesBiasUnit() {
+        layerSizes = Arrays.asList(2, 1);
+        DoubleMatrix theta1 = new DoubleMatrix(new double [][] {
+                {1.000, 0.69149, 0.23113}
+        });
+        
+        DoubleMatrix expectedOutputs = new DoubleMatrix(new double [][] {
+                {0.69149, 0.23113}     
+        });
+
+        List<DoubleMatrix> thetas = Arrays.asList(theta1);
+        mNeuralNetwork = new NeuralNetwork.Builder(layerSizes).theta(thetas).build();
+        DoubleMatrix result = mNeuralNetwork.getMatrixNoBias(theta1);
+        
+        Assert.assertArrayEquals(expectedOutputs.toArray(), result.toArray(), 0.0001);
+    }
+    
+    @Test
+    public void getThetaRegularizationReturnsZeroWithDefaultLambda() {
+        layerSizes = Arrays.asList(2, 1);
+        DoubleMatrix theta1 = new DoubleMatrix(new double [][] {
+                {1.000, 0.69149, 0.23113}
+        });
+        
+        double expected = 0.0;
+        
+        List<DoubleMatrix> thetas = Arrays.asList(theta1);
+        mNeuralNetwork = new NeuralNetwork.Builder(layerSizes).theta(thetas).build();
+        double result = mNeuralNetwork.getThetaRegularization(1);
+        
+        assertEquals(expected, result, 0.0001);
+    } 
+    
+    @Test
+    public void getThetaRegularizationReturnsCorrectWithLambdaOne() {
+        layerSizes = Arrays.asList(2, 1);
+        DoubleMatrix theta1 = new DoubleMatrix(new double [][] {
+                {1.000, 0.69149, 0.23113}
+        });
+        
+        double expected = 0.26579;
+        
+        List<DoubleMatrix> thetas = Arrays.asList(theta1);
+        mNeuralNetwork = new NeuralNetwork.Builder(layerSizes).theta(thetas).lambda(1.0).build();
+        double result = mNeuralNetwork.getThetaRegularization(1);
+        
+        assertEquals(expected, result, 0.0001);
+    }
 }

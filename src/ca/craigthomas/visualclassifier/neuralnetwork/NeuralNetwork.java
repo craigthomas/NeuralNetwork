@@ -9,6 +9,7 @@ import java.lang.IllegalArgumentException;
 
 import org.jblas.DoubleMatrix;
 import org.jblas.MatrixFunctions;
+import org.jblas.ranges.*;
 import org.jblas.util.Random;
 
 import ca.craigthomas.visualclassifier.activation.IActivationFunction;
@@ -32,6 +33,7 @@ public class NeuralNetwork {
     private DoubleMatrix[] mActivations;
     private Random mRandom;
     private DoubleMatrix mIdentities;
+    private final double mLambda;
     
     public static class Builder {
         
@@ -62,6 +64,7 @@ public class NeuralNetwork {
                 mLayerSizes[index] = layerSizes.get(index).intValue();
             }
             mTrain = false;
+            mLambda = 0.0;
         }
         
         /**
@@ -165,6 +168,7 @@ public class NeuralNetwork {
         mActivationFunction = builder.mActivationFunction;
         mActivations = new DoubleMatrix[mLayerSizes.length];
         mIdentities = builder.mExpected;
+        mLambda = builder.mLambda;
         
         if ((builder.mTrain) && (builder.mInputs == null)) {
             throw new IllegalStateException("Cannot train network without training examples");
@@ -222,6 +226,21 @@ public class NeuralNetwork {
     }
     
     /**
+     * Returns a the specified matrix without a bias unit attached (i.e. the
+     * matrix without the first column of 1's).
+     * 
+     * @param matrix the matrix to slice
+     * @return the matrix without the first column
+     */
+    protected DoubleMatrix getMatrixNoBias(DoubleMatrix matrix) {
+        int numRows = matrix.rows;
+        int numCols = matrix.columns;
+        Range rows = new IntervalRange(0, numRows);
+        Range cols = new IntervalRange(1, numCols);
+        return matrix.get(rows, cols);
+    }
+    
+    /**
      * Return the specified theta matrix.
      * 
      * @param thetaNum the theta number to return
@@ -229,6 +248,21 @@ public class NeuralNetwork {
      */
     public DoubleMatrix getTheta(int thetaNum) {
         return mThetas[thetaNum];
+    }
+    
+    /**
+     * Computes the regularization term for the thetas in the network.
+     * 
+     * @param numInputs the number of inputs over which to regularize
+     * @return the regularized term for the thetas
+     */
+    public double getThetaRegularization(int numInputs) {
+        double thetaSum = 0.0;
+        for (DoubleMatrix theta : mThetas) {
+            DoubleMatrix thetaNoBias = getMatrixNoBias(theta);
+            thetaSum += thetaNoBias.mul(thetaNoBias).sum();
+        }
+        return (mLambda / (2*numInputs)) * thetaSum;
     }
 
     /**
