@@ -4,6 +4,7 @@
  */
 package ca.craigthomas.visualclassifier.neuralnetwork;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.lang.IllegalArgumentException;
 
@@ -31,7 +32,6 @@ public class NeuralNetwork {
     private DoubleMatrix[] mThetas;
     private final IActivationFunction mActivationFunction;
     private DoubleMatrix[] mActivations;
-    private Random mRandom;
     private DoubleMatrix mIdentities;
     private final double mLambda;
     
@@ -176,10 +176,34 @@ public class NeuralNetwork {
             setInputs(builder.mInputs);
         }
         
-        // TODO: perform random initialization of thetas for symmetry breaking
-        // TODO: 
+        if (mThetas == null) {
+            initThetas();
+        }
+    }
+
+    /**
+     * Perform random initialization of thetas to break symmetry if the value
+     * for theta was not passed to the builder.
+     */
+    public void initThetas() {
+        List<DoubleMatrix> thetas = new ArrayList<DoubleMatrix>();
+        for (int layer = 0; layer < mLayerSizes.length - 1; layer++) {
+            int inputNodes = mLayerSizes[layer];
+            int outputNodes = mLayerSizes[layer+1];
+            double range = Math.sqrt(6) / Math.sqrt(inputNodes + outputNodes);
+            DoubleMatrix theta = DoubleMatrix.ones(outputNodes, inputNodes + 1);
+            for (int col = 0; col < theta.columns; col++) {
+                for (int row = 0; row < theta.rows; row++) {
+                    double init = (Random.nextDouble() * range) - range; 
+                    theta.put(row, col, init);
+                }
+            }
+            thetas.add(theta);
+        }
+        mThetas = thetas.toArray(new DoubleMatrix[thetas.size()]);
     }
     
+
     /**
      * Will initialize various parameters of the network.
      */

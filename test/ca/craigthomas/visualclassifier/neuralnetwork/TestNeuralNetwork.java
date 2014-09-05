@@ -5,6 +5,7 @@
 package ca.craigthomas.visualclassifier.neuralnetwork;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.IllegalArgumentException;
 import java.util.Arrays;
@@ -325,5 +326,24 @@ public class TestNeuralNetwork {
         mNeuralNetwork.predict(testInputs);
 
         assertEquals(expectedCost, mNeuralNetwork.getCost(), 0.0005);
+    }
+    
+    @Test
+    public void testNewNeuralNetworkHasRandomValuesForThetas() {
+        layerSizes = Arrays.asList(2, 1);
+        mNeuralNetwork = new NeuralNetwork.Builder(layerSizes).build();
+        DoubleMatrix result = mNeuralNetwork.getTheta(0);
+        
+        double maxRange = Math.sqrt(6);
+
+        assertEquals(1, result.rows);
+        assertEquals(3, result.columns);
+        
+        for (int row = 0; row < result.rows; row++) {
+            for (int col = 0; col < result.columns; col++) {
+                assertTrue(result.get(row, col) < maxRange);
+                assertTrue(result.get(row, col) > -maxRange);
+            }
+        }
     }
 }
