@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.jblas.DoubleMatrix;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import ca.craigthomas.visualclassifier.neuralnetwork.NeuralNetwork;
@@ -18,6 +19,11 @@ public class TestNeuralNetwork {
 
     private NeuralNetwork mNeuralNetwork;
     private List<Integer> layerSizes;
+    
+    @Before
+    public void setUp() {
+        mNeuralNetwork = null;
+    }
     
     @Test (expected=IllegalArgumentException.class)
     public void testLessThanTwoLayers() {
@@ -83,7 +89,7 @@ public class TestNeuralNetwork {
     
     @Test
     public void testPredictXORFunction() {
-        layerSizes = Arrays.asList(3, 1);
+        layerSizes = Arrays.asList(3, 1, 1);
         DoubleMatrix theta1 = new DoubleMatrix(new double [][] {
                 {-100.0, 200.0, 200.0},
                 {200.0, -150.0, -150.0}

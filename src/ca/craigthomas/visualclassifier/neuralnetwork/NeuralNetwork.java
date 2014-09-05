@@ -8,6 +8,7 @@ import java.util.List;
 import java.lang.IllegalArgumentException;
 
 import org.jblas.DoubleMatrix;
+import org.jblas.util.Random;
 
 import ca.craigthomas.visualclassifier.activation.IActivationFunction;
 import ca.craigthomas.visualclassifier.activation.Sigmoid;
@@ -24,14 +25,16 @@ import ca.craigthomas.visualclassifier.activation.Sigmoid;
  */
 public class NeuralNetwork {
 
-    private final List<Integer> mLayerSizes;
-    private final List<DoubleMatrix> mThetas;
+    private int[] mLayerSizes;
+    private DoubleMatrix[] mThetas;
     private final IActivationFunction mActivationFunction;
+    private DoubleMatrix[] mActivations;
+    private Random mRandom;
     
     public static class Builder {
         
-        private List<Integer> mLayerSizes;
-        private List<DoubleMatrix> mThetas;
+        private int[] mLayerSizes;
+        private DoubleMatrix[] mThetas;
         private DoubleMatrix mInputs;
         private DoubleMatrix mOutputs;
         private double mLambda;
@@ -52,7 +55,10 @@ public class NeuralNetwork {
             if (layerSizes.size() < 2) {
                 throw new IllegalArgumentException("must have at least 2 layers");
             }
-            mLayerSizes = layerSizes;
+            mLayerSizes = new int[layerSizes.size()];
+            for (int index = 0; index < layerSizes.size(); index++) {
+                mLayerSizes[index] = layerSizes.get(index).intValue();
+            }
             mTrain = false;
         }
         
@@ -64,7 +70,7 @@ public class NeuralNetwork {
          * @return the builder for the neural network
          */
         public Builder theta(List<DoubleMatrix> thetas) {
-            mThetas = thetas;
+            mThetas = thetas.toArray(new DoubleMatrix[thetas.size()]);
             return this;
         }
         
@@ -146,10 +152,69 @@ public class NeuralNetwork {
         }
     }
     
+    /**
+     * Build the neural network based on the values set by the builder.
+     * 
+     * @param builder the builder with instructions on building the network
+     */
     private NeuralNetwork(Builder builder) {
         mLayerSizes = builder.mLayerSizes;
         mThetas = builder.mThetas;
         mActivationFunction = builder.mActivationFunction;
+        mActivations = new DoubleMatrix[mLayerSizes.length];
+        
+        if ((builder.mTrain) && (builder.mInputs == null)) {
+            throw new IllegalStateException("Cannot train network without training examples");
+        } else if (builder.mTrain) {
+            setInputs(builder.mInputs);
+        }
+        
+        initializeNetwork();
+    }
+    
+    /**
+     * Will initialize various parameters of the network.
+     */
+    protected void initializeNetwork() {
+    }
+    
+    /**
+     * Adds a bias unit on to the specified matrix. This essentially adds a 
+     * column of 1's to the input matrix.
+     * 
+     * @param input the matrix to add on to
+     * @return a new matrix with a bias unit
+     */
+    public DoubleMatrix addBias(DoubleMatrix input) {
+        int length = input.rows;
+        DoubleMatrix ones = DoubleMatrix.ones(length, 1);
+        return DoubleMatrix.concatHorizontally(ones, input.dup());
+    }
+    
+    /**
+     * Sets the inputs for the neural network. Will add a bias unit to 
+     * the set of inputs.
+     * 
+     * @param input the matrix to treat as input
+     */
+    public void setInputs(DoubleMatrix input) {
+        mActivations[0] = addBias(input);
+    }
+    
+    /**
+     * Apply forward propagation to the neural network, updating the activations
+     * as it moves through the network.
+     */
+    protected void forwardPropagation() {
+        for (int index = 0; index < mActivations.length - 1; index++) {
+            DoubleMatrix theta = mThetas[index];
+            DoubleMatrix activation = mActivations[index];
+            DoubleMatrix z = activation.mmul(theta.transpose());
+            mActivations[index+1] = mActivationFunction.apply(z);
+            if (index+1 != mActivations.length - 1) {
+                mActivations[index+1] = addBias(mActivations[index+1]);
+            } 
+        }
     }
     
     /**
@@ -159,28 +224,22 @@ public class NeuralNetwork {
      * @return the theta values for that layer
      */
     public DoubleMatrix getTheta(int thetaNum) {
-        return mThetas.get(thetaNum);
+        return mThetas[thetaNum];
     }
     
     /**
      * Given a trained neural network (i.e. a trained network that has learned
-     * the values for theta, or has pre-supplied values for theta), compute
-     * the resulting output values given some data as input. 
+     * the values for theta, or has pre-supplied values for theta, plus the 
+     * activations layers), compute the resulting output values given some data 
+     * as input. 
      * 
      * @param data the examples to predict
      * @return the predicted values (classes)
      */
     public DoubleMatrix predict(DoubleMatrix data) {
-        int length = data.rows;
-        DoubleMatrix lastLayer = data.dup();
-        
-        for (int layer = 0; layer < mThetas.size(); layer++) {
-            DoubleMatrix ones = DoubleMatrix.ones(length, 1);
-            DoubleMatrix activation = DoubleMatrix.concatHorizontally(ones, lastLayer);
-            lastLayer = mActivationFunction.apply(activation.mmul(mThetas.get(layer).transpose()));
-        }
-        
-        return lastLayer;
+        setInputs(data);
+        forwardPropagation();
+        return mActivations[mLayerSizes.length - 1];
     }
     
 }
