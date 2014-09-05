@@ -270,13 +270,23 @@ public class NeuralNetwork {
      * 
      * @return the cost of the thetas
      */
-    public double getCostNoRegularization() {
-        int numInputs = mActivations[0].getRows();
+    public double getCostNoRegularization(int numInputs) {
         DoubleMatrix outputLayer = mActivations[mActivations.length - 1];
         DoubleMatrix expected = mIdentities.transpose().mul(-1);
         DoubleMatrix posTerm = expected.mmul(MatrixFunctions.log(outputLayer));
         DoubleMatrix negTerm = expected.add(1.0).mmul(MatrixFunctions.log(outputLayer.mul(-1).add(1.0)));
         return (1.0/numInputs) * posTerm.sub(negTerm).sum();
+    }
+    
+    /**
+     * Calculates cost with regularization. Regularization will not be applied
+     * when the lambda value is 0 (by default).
+     * 
+     * @return the cost
+     */
+    public double getCost() {
+        int numInputs = mActivations[0].rows;
+        return getCostNoRegularization(numInputs) + getThetaRegularization(numInputs);
     }
     
     /**

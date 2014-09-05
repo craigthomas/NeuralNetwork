@@ -207,7 +207,7 @@ public class TestNeuralNetwork {
         mNeuralNetwork = new NeuralNetwork.Builder(layerSizes).theta(thetas).expectedValues(expectedOutputs).build();
         mNeuralNetwork.predict(testInputs);
 
-        assertEquals(expectedCost, mNeuralNetwork.getCostNoRegularization(), 0.0005);
+        assertEquals(expectedCost, mNeuralNetwork.getCostNoRegularization(8), 0.0005);
     }
     
     @Test
@@ -258,5 +258,72 @@ public class TestNeuralNetwork {
         double result = mNeuralNetwork.getThetaRegularization(1);
         
         assertEquals(expected, result, 0.0001);
+    }
+    
+    @Test
+    public void testNeuralNetworkGetCostNoLambda() {
+        layerSizes = Arrays.asList(2, 1);
+        DoubleMatrix theta1 = new DoubleMatrix(new double [][] {
+                {0.73258, 0.69149, 0.23113}
+        });
+        
+        DoubleMatrix testInputs = new DoubleMatrix(new double [][] {
+                {0.126222, 0.077800},
+                {0.956743, 0.682936},
+                {0.723205, 0.311276},
+                {0.307307, 0.429310},
+                {0.772100, 0.066606},
+                {0.660782, 0.067908},
+                {0.161723, 0.994278},
+                {0.472773, 0.777440},
+        });
+
+        DoubleMatrix expectedOutputs = new DoubleMatrix(new double [][] {
+                {0.0}, {0.0}, {0.0}, {1.0}, {1.0}, {0.0}, {1.0}, {1.0}
+        });
+
+        double expectedCost = 0.88101;
+        
+        List<DoubleMatrix> thetas = Arrays.asList(theta1);
+        mNeuralNetwork = new NeuralNetwork.Builder(layerSizes).theta(thetas)
+                .inputs(testInputs).expectedValues(expectedOutputs).build();
+        mNeuralNetwork.predict(testInputs);
+
+        assertEquals(expectedCost, mNeuralNetwork.getCost(), 0.0005);
+    }
+    
+    @Test
+    public void testNeuralNetworkGetCostWithLambda() {
+        layerSizes = Arrays.asList(2, 1);
+        DoubleMatrix theta1 = new DoubleMatrix(new double [][] {
+                {0.73258, 0.69149, 0.23113}
+        });
+        
+        DoubleMatrix testInputs = new DoubleMatrix(new double [][] {
+                {0.126222, 0.077800},
+                {0.956743, 0.682936},
+                {0.723205, 0.311276},
+                {0.307307, 0.429310},
+                {0.772100, 0.066606},
+                {0.660782, 0.067908},
+                {0.161723, 0.994278},
+                {0.472773, 0.777440},
+        });
+
+        DoubleMatrix expectedOutputs = new DoubleMatrix(new double [][] {
+                {0.0}, {0.0}, {0.0}, {1.0}, {1.0}, {0.0}, {1.0}, {1.0}
+        });
+        
+        double lambda = 1.0;
+
+        double expectedCost = 0.91423;
+        
+        List<DoubleMatrix> thetas = Arrays.asList(theta1);
+        mNeuralNetwork = new NeuralNetwork.Builder(layerSizes).theta(thetas)
+                .inputs(testInputs).expectedValues(expectedOutputs)
+                .lambda(lambda).build();
+        mNeuralNetwork.predict(testInputs);
+
+        assertEquals(expectedCost, mNeuralNetwork.getCost(), 0.0005);
     }
 }
