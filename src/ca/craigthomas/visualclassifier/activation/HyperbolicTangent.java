@@ -30,9 +30,7 @@ public class HyperbolicTangent implements IActivationFunction {
      * @return the tanh value of the input matrix
      */
     public DoubleMatrix apply(DoubleMatrix input) {
-        DoubleMatrix result = new DoubleMatrix().copy(input).muli(2.0);
-        MatrixFunctions.expi(result);
-        return result.sub(1.0).div(result.add(1.0));
+        return MatrixFunctions.tanh(input);
     }
 
     /**
@@ -42,6 +40,6 @@ public class HyperbolicTangent implements IActivationFunction {
      * @return the sigmoid value of the input
      */
     public double apply(double input) {
-        return (1.0 - Math.exp(-2*input)) / (1.0 + Math.exp(-2*input));
+        return MatrixFunctions.tanh(input);
     }
 }
