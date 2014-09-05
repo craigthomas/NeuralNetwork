@@ -1,6 +1,6 @@
 # ML Deer Detector
 
-[![Build Status](https://travis-ci.org/craigthomas/DeerDetector.svg?branch=master)](https://travis-ci.org/craigthomas/MLDeerDetector) [![Coverage Status](https://coveralls.io/repos/craigthomas/DeerDetector/badge.png)](https://coveralls.io/r/craigthomas/DeerDetector)
+[![Build Status](https://travis-ci.org/craigthomas/DeerDetector.svg?branch=master)](https://travis-ci.org/craigthomas/DeerDetector) [![Coverage Status](https://coveralls.io/repos/craigthomas/DeerDetector/badge.png)](https://coveralls.io/r/craigthomas/DeerDetector)
 
 
 ## What is it?
