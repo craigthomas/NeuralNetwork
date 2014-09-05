@@ -8,6 +8,7 @@ import java.util.List;
 import java.lang.IllegalArgumentException;
 
 import org.jblas.DoubleMatrix;
+import org.jblas.MatrixFunctions;
 import org.jblas.util.Random;
 
 import ca.craigthomas.visualclassifier.activation.IActivationFunction;
@@ -30,13 +31,14 @@ public class NeuralNetwork {
     private final IActivationFunction mActivationFunction;
     private DoubleMatrix[] mActivations;
     private Random mRandom;
+    private DoubleMatrix mIdentities;
     
     public static class Builder {
         
         private int[] mLayerSizes;
         private DoubleMatrix[] mThetas;
         private DoubleMatrix mInputs;
-        private DoubleMatrix mOutputs;
+        private DoubleMatrix mExpected;
         private double mLambda;
         private boolean mTrain;
         private IActivationFunction mActivationFunction;
@@ -105,8 +107,8 @@ public class NeuralNetwork {
          * @param outputs the true valued output for the training examples
          * @return the builder for the neural network
          */
-        public Builder outputs(DoubleMatrix outputs) {
-            mOutputs = outputs;
+        public Builder expectedValues(DoubleMatrix expected) {
+            mExpected = expected;
             return this;
         }
         
@@ -162,6 +164,7 @@ public class NeuralNetwork {
         mThetas = builder.mThetas;
         mActivationFunction = builder.mActivationFunction;
         mActivations = new DoubleMatrix[mLayerSizes.length];
+        mIdentities = builder.mExpected;
         
         if ((builder.mTrain) && (builder.mInputs == null)) {
             throw new IllegalStateException("Cannot train network without training examples");
@@ -169,7 +172,8 @@ public class NeuralNetwork {
             setInputs(builder.mInputs);
         }
         
-        initializeNetwork();
+        // TODO: perform random initialization of thetas for symmetry breaking
+        // TODO: 
     }
     
     /**
@@ -225,6 +229,20 @@ public class NeuralNetwork {
      */
     public DoubleMatrix getTheta(int thetaNum) {
         return mThetas[thetaNum];
+    }
+
+    /**
+     * Get the cost associated with the current thetas.
+     * 
+     * @return the cost of the thetas
+     */
+    public double getCostNoRegularization() {
+        int numInputs = mActivations[0].getRows();
+        DoubleMatrix outputLayer = mActivations[mActivations.length - 1];
+        DoubleMatrix expected = mIdentities.transpose().mul(-1);
+        DoubleMatrix posTerm = expected.mmul(MatrixFunctions.log(outputLayer));
+        DoubleMatrix negTerm = expected.add(1.0).mmul(MatrixFunctions.log(outputLayer.mul(-1).add(1.0)));
+        return (1.0/numInputs) * posTerm.sub(negTerm).sum();
     }
     
     /**
