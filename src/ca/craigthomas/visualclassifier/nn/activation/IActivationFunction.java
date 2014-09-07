@@ -2,7 +2,7 @@
  * Copyright (C) 2014 Craig Thomas
  * This project uses an MIT style license - see LICENSE for details.
  */
-package ca.craigthomas.visualclassifier.activation;
+package ca.craigthomas.visualclassifier.nn.activation;
 
 import org.jblas.DoubleMatrix;
 

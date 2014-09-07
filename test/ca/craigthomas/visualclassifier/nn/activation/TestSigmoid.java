@@ -2,7 +2,7 @@
  * Copyright (C) 2014 Craig Thomas
  * This project uses an MIT style license - see LICENSE for details.
  */
-package ca.craigthomas.visualclassifier.activation;
+package ca.craigthomas.visualclassifier.nn.activation;
 
 import static org.junit.Assert.*;
 
@@ -11,7 +11,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import ca.craigthomas.visualclassifier.activation.Sigmoid;
+import ca.craigthomas.visualclassifier.nn.activation.Sigmoid;
 
 public class TestSigmoid {
     

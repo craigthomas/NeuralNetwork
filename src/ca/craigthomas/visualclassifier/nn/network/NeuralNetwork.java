@@ -2,7 +2,7 @@
  * Copyright (C) 2014 Craig Thomas
  * This project uses an MIT style license - see LICENSE for details.
  */
-package ca.craigthomas.visualclassifier.neuralnetwork;
+package ca.craigthomas.visualclassifier.nn.network;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +13,8 @@ import org.jblas.MatrixFunctions;
 import org.jblas.ranges.*;
 import org.jblas.util.Random;
 
-import ca.craigthomas.visualclassifier.activation.IActivationFunction;
-import ca.craigthomas.visualclassifier.activation.Sigmoid;
+import ca.craigthomas.visualclassifier.nn.activation.IActivationFunction;
+import ca.craigthomas.visualclassifier.nn.activation.Sigmoid;
 
 /**
  * Implements a neural network. Multiple layers can be specified in the 

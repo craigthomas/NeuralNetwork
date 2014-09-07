@@ -2,7 +2,7 @@
  * Copyright (C) 2014 Craig Thomas
  * This project uses an MIT style license - see LICENSE for details.
  */
-package ca.craigthomas.visualclassifier.neuralnetwork;
+package ca.craigthomas.visualclassifier.nn.network;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -16,7 +16,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import ca.craigthomas.visualclassifier.neuralnetwork.NeuralNetwork;
+import ca.craigthomas.visualclassifier.nn.network.NeuralNetwork;
 
 public class TestNeuralNetwork {
 
