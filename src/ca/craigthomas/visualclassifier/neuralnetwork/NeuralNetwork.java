@@ -326,6 +326,21 @@ public class NeuralNetwork {
         }
         return (mLambda / (2*numInputs)) * thetaSum;
     }
+    
+    /** 
+     * Get the gradient of the specified theta.
+     * 
+     * @param thetaNum the theta number to fetch
+     * @return the gradient of the theta values
+     */
+    public DoubleMatrix getThetaGradient(int thetaNum) {
+        int numInputs = mActivations[0].rows;
+        DoubleMatrix gradient = mActivations[thetaNum].transpose().mmul(mDeltas[thetaNum + 1]).transpose();
+        DoubleMatrix regularization =  getMatrixNoBias(mThetas[thetaNum]).muli(mLambda / numInputs);
+        DoubleMatrix zeros = DoubleMatrix.zeros(regularization.rows, 1);
+        regularization = DoubleMatrix.concatHorizontally(zeros, regularization);
+        return gradient.divi(numInputs).add(regularization);
+    }
 
     /**
      * Get the cost associated with the current thetas.

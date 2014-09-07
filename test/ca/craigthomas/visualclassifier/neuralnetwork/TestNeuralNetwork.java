@@ -434,7 +434,106 @@ public class TestNeuralNetwork {
 
         assertEquals(expectedCost, mNeuralNetwork.getCost(), 0.0005);
         Assert.assertArrayEquals(expectedDelta2.toArray(), delta2.toArray(), 0.0001);
-        System.out.println("delta1 " + delta1.toString());
         Assert.assertArrayEquals(expectedDelta1.toArray(), delta1.toArray(), 0.0001);
+    }
+    
+    @Test
+    public void testThetaGetGradient() {
+        layerSizes = Arrays.asList(2, 2, 1);
+        DoubleMatrix theta1 = new DoubleMatrix(new double [][] {
+                {0.73258, 0.69149, 0.23113}
+        });
+        
+        DoubleMatrix theta2 = new DoubleMatrix(new double [][] {
+                {0.92982, 0.33938}
+        });
+        
+        DoubleMatrix testInputs = new DoubleMatrix(new double [][] {
+                {0.126222, 0.077800},
+                {0.956743, 0.682936},
+                {0.723205, 0.311276},
+                {0.307307, 0.429310},
+                {0.772100, 0.066606},
+                {0.660782, 0.067908},
+                {0.161723, 0.994278},
+                {0.472773, 0.777440},
+        });
+
+        DoubleMatrix expectedOutputs = new DoubleMatrix(new double [][] {
+                {0.0}, {0.0}, {0.0}, {1.0}, {1.0}, {0.0}, {1.0}, {1.0}
+        });
+        
+        double lambda = 0.0;
+
+        DoubleMatrix expectedTheta1Grad = new DoubleMatrix(new double [][] {
+                {0.0155702, 0.0101371, 0.0016941}
+        });
+        
+        DoubleMatrix expectedTheta2Grad = new DoubleMatrix(new double [][] {
+                {0.26665, 0.20640}
+        });
+        
+        List<DoubleMatrix> thetas = Arrays.asList(theta1, theta2);
+        mNeuralNetwork = new NeuralNetwork.Builder(layerSizes).theta(thetas)
+                .inputs(testInputs).expectedValues(expectedOutputs)
+                .lambda(lambda).build();
+        mNeuralNetwork.forwardPropagation();
+        mNeuralNetwork.backPropagation();
+        
+        DoubleMatrix theta1Grad = mNeuralNetwork.getThetaGradient(0);
+        DoubleMatrix theta2Grad = mNeuralNetwork.getThetaGradient(1);
+
+        Assert.assertArrayEquals(expectedTheta1Grad.toArray(), theta1Grad.toArray(), 0.0001);
+        Assert.assertArrayEquals(expectedTheta2Grad.toArray(), theta2Grad.toArray(), 0.0001);
+    }
+    
+    @Test
+    public void testThetaGetGradientWithLambda() {
+        layerSizes = Arrays.asList(2, 2, 1);
+        DoubleMatrix theta1 = new DoubleMatrix(new double [][] {
+                {0.73258, 0.69149, 0.23113}
+        });
+        
+        DoubleMatrix theta2 = new DoubleMatrix(new double [][] {
+                {0.92982, 0.33938}
+        });
+        
+        DoubleMatrix testInputs = new DoubleMatrix(new double [][] {
+                {0.126222, 0.077800},
+                {0.956743, 0.682936},
+                {0.723205, 0.311276},
+                {0.307307, 0.429310},
+                {0.772100, 0.066606},
+                {0.660782, 0.067908},
+                {0.161723, 0.994278},
+                {0.472773, 0.777440},
+        });
+
+        DoubleMatrix expectedOutputs = new DoubleMatrix(new double [][] {
+                {0.0}, {0.0}, {0.0}, {1.0}, {1.0}, {0.0}, {1.0}, {1.0}
+        });
+        
+        double lambda = 1.0;
+
+        DoubleMatrix expectedTheta1Grad = new DoubleMatrix(new double [][] {
+                {0.0155700, 0.096573, 0.030585}
+        });
+        
+        DoubleMatrix expectedTheta2Grad = new DoubleMatrix(new double [][] {
+                {0.26665, 0.24882}
+        });
+        
+        List<DoubleMatrix> thetas = Arrays.asList(theta1, theta2);
+        mNeuralNetwork = new NeuralNetwork.Builder(layerSizes).theta(thetas)
+                .inputs(testInputs).expectedValues(expectedOutputs)
+                .lambda(lambda).build();
+        mNeuralNetwork.forwardPropagation();
+        mNeuralNetwork.backPropagation();
+        
+        DoubleMatrix theta1Grad = mNeuralNetwork.getThetaGradient(0);
+        DoubleMatrix theta2Grad = mNeuralNetwork.getThetaGradient(1);
+
+        Assert.assertArrayEquals(expectedTheta1Grad.toArray(), theta1Grad.toArray(), 0.0001);
+        Assert.assertArrayEquals(expectedTheta2Grad.toArray(), theta2Grad.toArray(), 0.0001);
     }
 }
