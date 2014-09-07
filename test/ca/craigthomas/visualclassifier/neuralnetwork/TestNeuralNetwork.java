@@ -346,4 +346,95 @@ public class TestNeuralNetwork {
             }
         }
     }
+    
+    @Test (expected=ArrayIndexOutOfBoundsException.class)
+    public void testGetThetaNegativeThetaThrowsException() {
+        layerSizes = Arrays.asList(2,1);
+        mNeuralNetwork = new NeuralNetwork.Builder(layerSizes).build();
+        mNeuralNetwork.getTheta(-1);
+    }
+    
+    @Test (expected=ArrayIndexOutOfBoundsException.class)
+    public void testGetThetaIndexTooLargeThrowsException() {
+        layerSizes = Arrays.asList(2,1);
+        mNeuralNetwork = new NeuralNetwork.Builder(layerSizes).build();
+        mNeuralNetwork.getTheta(10);
+    }
+
+    @Test (expected=ArrayIndexOutOfBoundsException.class)
+    public void testGetDeltaNegativeDeltaThrowsException() {
+        layerSizes = Arrays.asList(2,1);
+        mNeuralNetwork = new NeuralNetwork.Builder(layerSizes).build();
+        mNeuralNetwork.getDelta(-1);
+    }
+    
+    @Test (expected=ArrayIndexOutOfBoundsException.class)
+    public void testGetDeltaIndexTooLargeThrowsException() {
+        layerSizes = Arrays.asList(2,1);
+        mNeuralNetwork = new NeuralNetwork.Builder(layerSizes).build();
+        mNeuralNetwork.getDelta(10);
+    }
+    
+    @Test (expected=IllegalArgumentException.class)
+    public void testGetDeltaNullDeltaThrowsException() {
+        layerSizes = Arrays.asList(2,1);
+        mNeuralNetwork = new NeuralNetwork.Builder(layerSizes).build();
+        mNeuralNetwork.getDelta(0);
+    }   
+    
+    @Test
+    public void testNeuralNetworkCorrectDeltas() {
+        layerSizes = Arrays.asList(2, 2, 1);
+        DoubleMatrix theta1 = new DoubleMatrix(new double [][] {
+                {0.73258, 0.69149, 0.23113}
+        });
+        
+        DoubleMatrix theta2 = new DoubleMatrix(new double [][] {
+                {0.92982, 0.33938}
+        });
+        
+        DoubleMatrix testInputs = new DoubleMatrix(new double [][] {
+                {0.126222, 0.077800},
+                {0.956743, 0.682936},
+                {0.723205, 0.311276},
+                {0.307307, 0.429310},
+                {0.772100, 0.066606},
+                {0.660782, 0.067908},
+                {0.161723, 0.994278},
+                {0.472773, 0.777440},
+        });
+
+        DoubleMatrix expectedOutputs = new DoubleMatrix(new double [][] {
+                {0.0}, {0.0}, {0.0}, {1.0}, {1.0}, {0.0}, {1.0}, {1.0}
+        });
+        
+        double lambda = 0.0;
+
+        double expectedCost = 0.86126;
+        
+        DoubleMatrix expectedDelta2 = new DoubleMatrix(new double[][] {
+                {0.76255}, {0.77028}, {0.76795}, {-0.23490}, {-0.23228},
+                {0.76691}, {-0.23455}, {-0.23273}
+        });
+        
+        DoubleMatrix expectedDelta1 = new DoubleMatrix(new double[][] {
+                {0.054551}, {0.037707}, {0.043747}, {-0.015350}, {-0.013405},
+                {0.046172}, {-0.015107}, {-0.013754}
+        });
+        
+        List<DoubleMatrix> thetas = Arrays.asList(theta1, theta2);
+        mNeuralNetwork = new NeuralNetwork.Builder(layerSizes).theta(thetas)
+                .inputs(testInputs).expectedValues(expectedOutputs)
+                .lambda(lambda).build();
+        mNeuralNetwork.forwardPropagation();
+        mNeuralNetwork.backPropagation();
+        
+        DoubleMatrix delta2 = mNeuralNetwork.getDelta(2);
+        DoubleMatrix delta1 = mNeuralNetwork.getDelta(1);
+
+        assertEquals(expectedCost, mNeuralNetwork.getCost(), 0.0005);
+        Assert.assertArrayEquals(expectedDelta2.toArray(), delta2.toArray(), 0.0001);
+        System.out.println("delta1 " + delta1.toString());
+        Assert.assertArrayEquals(expectedDelta1.toArray(), delta1.toArray(), 0.0001);
+    }
 }

@@ -32,6 +32,10 @@ public class HyperbolicTangent implements IActivationFunction {
     public DoubleMatrix apply(DoubleMatrix input) {
         return MatrixFunctions.tanh(input);
     }
+    
+    public DoubleMatrix gradient(DoubleMatrix input) {
+        return null;
+    }
 
     /**
      * Calculate the Sigmoid value for a single double.

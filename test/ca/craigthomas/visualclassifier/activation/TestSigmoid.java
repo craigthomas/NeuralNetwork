@@ -7,6 +7,7 @@ package ca.craigthomas.visualclassifier.activation;
 import static org.junit.Assert.*;
 
 import org.jblas.DoubleMatrix;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -117,10 +118,18 @@ public class TestSigmoid {
         DoubleMatrix doubleMatrix = new DoubleMatrix(new double[][] {{1.0, 5.0, 100.0}, {-1.0, -5.0, -100.0}});
         DoubleMatrix expected = new DoubleMatrix(new double[][] {{0.73106, 0.99331, 1.0}, {0.26894, 0.0066929, 0.0}});
         DoubleMatrix result = mSigmoid.apply(doubleMatrix);
-        for (int row = 0; row < result.rows; row++) {
-            for (int col = 0; col < result.columns; col++) {
-                assertEquals(expected.get(row, col), result.get(row, col), 0.00001);
-            }
-        }
+        Assert.assertArrayEquals(expected.toArray(), result.toArray(), 0.0001);
+    }
+    
+    @Test
+    public void testSigmoidGradient() {
+        DoubleMatrix input = new DoubleMatrix(new double[][] {
+                {0.83784, 1.55201, 1.30461, 1.04431, 1.28187, 1.20520, 1.07422, 1.23919}
+        });
+        DoubleMatrix expected = new DoubleMatrix(new double [][] {
+                {0.210792}, {0.144243}, {0.167854}, {0.192553}, {0.170042}, {0.177398}, {0.189780}, {0.174142}
+        });
+        DoubleMatrix result = mSigmoid.gradient(input);
+        Assert.assertArrayEquals(expected.toArray(), result.toArray(), 0.0001);
     }
 }

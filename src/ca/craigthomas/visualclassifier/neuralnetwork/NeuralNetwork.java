@@ -32,6 +32,7 @@ public class NeuralNetwork {
     private DoubleMatrix[] mThetas;
     private final IActivationFunction mActivationFunction;
     private DoubleMatrix[] mActivations;
+    private DoubleMatrix[] mDeltas;
     private DoubleMatrix mIdentities;
     private final double mLambda;
     
@@ -167,13 +168,17 @@ public class NeuralNetwork {
         mThetas = builder.mThetas;
         mActivationFunction = builder.mActivationFunction;
         mActivations = new DoubleMatrix[mLayerSizes.length];
+        mDeltas = new DoubleMatrix[mLayerSizes.length];
         mIdentities = builder.mExpected;
         mLambda = builder.mLambda;
+        if (builder.mInputs != null) {
+            setInputs(builder.mInputs);
+        }
         
         if ((builder.mTrain) && (builder.mInputs == null)) {
             throw new IllegalStateException("Cannot train network without training examples");
         } else if (builder.mTrain) {
-            setInputs(builder.mInputs);
+            // train
         }
         
         if (mThetas == null) {
@@ -203,13 +208,6 @@ public class NeuralNetwork {
         mThetas = thetas.toArray(new DoubleMatrix[thetas.size()]);
     }
     
-
-    /**
-     * Will initialize various parameters of the network.
-     */
-    protected void initializeNetwork() {
-    }
-    
     /**
      * Adds a bias unit on to the specified matrix. This essentially adds a 
      * column of 1's to the input matrix.
@@ -235,9 +233,9 @@ public class NeuralNetwork {
     
     /**
      * Apply forward propagation to the neural network, updating the activations
-     * as it moves through the network.
+     * as it moves through the network. Save the activations in mActivations.
      */
-    protected void forwardPropagation() {
+    public void forwardPropagation() {
         for (int index = 0; index < mActivations.length - 1; index++) {
             DoubleMatrix theta = mThetas[index];
             DoubleMatrix activation = mActivations[index];
@@ -247,6 +245,43 @@ public class NeuralNetwork {
                 mActivations[index+1] = addBias(mActivations[index+1]);
             } 
         }
+    }
+
+    /**
+     * Perform back propagation on the neural network. In other words,
+     * compute the error from the expected values of the network, back to the
+     * input values. Save the resulting error amounts back in the mDeltas
+     * structure.
+     */
+    public void backPropagation() {
+        int outputLayer = mActivations.length - 1;
+        mDeltas[outputLayer] = mActivations[outputLayer].sub(mIdentities);
+        for (int index = outputLayer - 1; index > 0; index--) {
+            DoubleMatrix temp = getMatrixNoBias(mDeltas[index+1].mmul(mThetas[index]));
+            DoubleMatrix activation = mActivations[index-1];
+            DoubleMatrix theta = mThetas[index-1];
+            // TODO: store the z during forward propagation so we don't have to recompute here!
+            DoubleMatrix z = mActivationFunction.gradient(theta.mmul(activation.transpose()));
+            mDeltas[index] = temp.mul(z.transpose());
+        }
+    }
+
+    /**
+     * Grab the delta from the specified layer.
+     * 
+     * @param deltaNum the layer to retrieve
+     * @return the delta specified
+     */
+    public DoubleMatrix getDelta(int deltaNum) {
+        if ((deltaNum > mDeltas.length) || (deltaNum < 0)) {
+            throw new ArrayIndexOutOfBoundsException("illegal deltaNum");
+        }
+        
+        if (mDeltas[deltaNum] == null) {
+            throw new IllegalArgumentException("specified delta is null");
+        }
+        
+        return mDeltas[deltaNum];
     }
     
     /**
@@ -271,6 +306,9 @@ public class NeuralNetwork {
      * @return the theta values for that layer
      */
     public DoubleMatrix getTheta(int thetaNum) {
+        if ((thetaNum > mThetas.length) || (thetaNum < 0)) {
+            throw new ArrayIndexOutOfBoundsException("illegal thetaNum");
+        }
         return mThetas[thetaNum];
     }
     
@@ -315,9 +353,8 @@ public class NeuralNetwork {
     
     /**
      * Given a trained neural network (i.e. a trained network that has learned
-     * the values for theta, or has pre-supplied values for theta, plus the 
-     * activations layers), compute the resulting output values given some data 
-     * as input. 
+     * the values for theta, or has pre-supplied values for theta), compute the 
+     * resulting output values given some data as input. 
      * 
      * @param data the examples to predict
      * @return the predicted values (classes)

@@ -36,6 +36,18 @@ public class Sigmoid implements IActivationFunction {
         result.addi(1);
         return ones.divi(result);
     }
+    
+    /**
+     * Computes the gradient of the sigmoid function with the specified inputs.
+     * 
+     * @param input the DoubleMatrix to use as input
+     * @return the gradient of the sigmoid
+     */
+    public DoubleMatrix gradient(DoubleMatrix input) {
+        DoubleMatrix sigmoid = apply(input);
+        DoubleMatrix ones = DoubleMatrix.ones(input.rows, input.columns);
+        return sigmoid.mul(ones.sub(sigmoid));
+    }
 
     /**
      * Calculate the Sigmoid value for a single double.
