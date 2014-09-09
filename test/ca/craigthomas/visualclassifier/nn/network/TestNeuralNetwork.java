@@ -36,7 +36,7 @@ public class TestNeuralNetwork {
     
     @Test
     public void testPredictANDFunction() {
-        layerSizes = Arrays.asList(3, 1);
+        layerSizes = Arrays.asList(2, 1);
         DoubleMatrix theta = new DoubleMatrix(new double [][] {
                 {-300.0, 200.0, 200.0}
         });
@@ -64,7 +64,7 @@ public class TestNeuralNetwork {
     
     @Test
     public void testPredictORFunction() {
-        layerSizes = Arrays.asList(3, 1);
+        layerSizes = Arrays.asList(2, 1);
         DoubleMatrix theta = new DoubleMatrix(new double [][] {
                 {-100.0, 200.0, 200.0}
         });
@@ -92,7 +92,7 @@ public class TestNeuralNetwork {
     
     @Test
     public void testPredictXORFunction() {
-        layerSizes = Arrays.asList(3, 1, 1);
+        layerSizes = Arrays.asList(2, 2, 1);
         DoubleMatrix theta1 = new DoubleMatrix(new double [][] {
                 {-100.0, 200.0, 200.0},
                 {200.0, -150.0, -150.0}
@@ -125,7 +125,7 @@ public class TestNeuralNetwork {
     
     @Test
     public void testPredictNOTFunction() {
-        layerSizes = Arrays.asList(3, 1);
+        layerSizes = Arrays.asList(1, 1);
         DoubleMatrix theta = new DoubleMatrix(new double [][] {
                 {100.0, -200.0}
         });
@@ -149,7 +149,7 @@ public class TestNeuralNetwork {
     
     @Test
     public void testPredictXNORFunction() {
-        layerSizes = Arrays.asList(3, 2, 1);
+        layerSizes = Arrays.asList(2, 2, 1);
         DoubleMatrix theta1 = new DoubleMatrix(new double [][] {
                 {-300.0, 200.0, 200.0},
                 {100.0, -200.0, -200.0},

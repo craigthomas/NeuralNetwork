@@ -5,6 +5,7 @@
 package ca.craigthomas.visualclassifier.nn.network;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.lang.IllegalArgumentException;
 
@@ -31,7 +32,7 @@ public class NeuralNetwork {
     private int[] mLayerSizes;
     private DoubleMatrix[] mThetas;
     private final IActivationFunction mActivationFunction;
-    private DoubleMatrix[] mActivations;
+    public DoubleMatrix[] mActivations;
     private DoubleMatrix[] mDeltas;
     private DoubleMatrix mIdentities;
     private final double mLambda;
@@ -175,12 +176,6 @@ public class NeuralNetwork {
             setInputs(builder.mInputs);
         }
         
-        if ((builder.mTrain) && (builder.mInputs == null)) {
-            throw new IllegalStateException("Cannot train network without training examples");
-        } else if (builder.mTrain) {
-            // train
-        }
-        
         if (mThetas == null) {
             initThetas();
         }
@@ -199,7 +194,7 @@ public class NeuralNetwork {
             DoubleMatrix theta = DoubleMatrix.ones(outputNodes, inputNodes + 1);
             for (int col = 0; col < theta.columns; col++) {
                 for (int row = 0; row < theta.rows; row++) {
-                    double init = (Random.nextDouble() * range) - range; 
+                    double init = (Random.nextDouble() * 2 * range) - range; 
                     theta.put(row, col, init);
                 }
             }
@@ -255,7 +250,7 @@ public class NeuralNetwork {
      */
     public void backPropagation() {
         int outputLayer = mActivations.length - 1;
-        mDeltas[outputLayer] = mActivations[outputLayer].sub(mIdentities);
+        mDeltas[outputLayer] = mActivations[outputLayer].dup().sub(mIdentities);
         for (int index = outputLayer - 1; index > 0; index--) {
             DoubleMatrix temp = getMatrixNoBias(mDeltas[index+1].mmul(mThetas[index]));
             DoubleMatrix activation = mActivations[index-1];
@@ -313,6 +308,24 @@ public class NeuralNetwork {
     }
     
     /**
+     * Get all of the thetas.
+     * 
+     * @return the thetas
+     */
+    public List<DoubleMatrix> getThetas() {
+        return Arrays.asList(mThetas);
+    }
+    
+    /**
+     * Sets the thetas for the neural network.
+     * 
+     * @param thetas the new thetas for the network
+     */
+    public void setThetas(List<DoubleMatrix> thetas) {
+        mThetas = thetas.toArray(new DoubleMatrix[thetas.size()]);
+    }
+    
+    /**
      * Computes the regularization term for the thetas in the network.
      * 
      * @param numInputs the number of inputs over which to regularize
@@ -320,7 +333,8 @@ public class NeuralNetwork {
      */
     public double getThetaRegularization(int numInputs) {
         double thetaSum = 0.0;
-        for (DoubleMatrix theta : mThetas) {
+        for (int index = 0; index < mThetas.length; index++) {
+            DoubleMatrix theta = mThetas[index];
             DoubleMatrix thetaNoBias = getMatrixNoBias(theta);
             thetaSum += thetaNoBias.mul(thetaNoBias).sum();
         }
