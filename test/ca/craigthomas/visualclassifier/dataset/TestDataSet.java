@@ -26,6 +26,16 @@ public class TestDataSet {
     }
     
     @Test
+    public void newDataSetIsEmpty() {
+        mDataSet = new DataSet(false);
+        assertTrue(mDataSet.getSamples() == null);
+        assertTrue(mDataSet.getTruth() == null);
+        assertEquals(0, mDataSet.getNumColsSamples());
+        assertEquals(0, mDataSet.getNumColsTruth());
+        assertEquals(0, mDataSet.getNumSamples());
+    }
+    
+    @Test
     public void testReadFromCSVFileNoTruthWorksCorrectly() throws IOException {
         mDataSet = new DataSet(false);
         mDataSet.addFromCSVFile(SAMPLE_FILE);
