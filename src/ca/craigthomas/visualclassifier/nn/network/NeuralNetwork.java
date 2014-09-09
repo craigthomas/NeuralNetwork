@@ -44,7 +44,6 @@ public class NeuralNetwork {
         private DoubleMatrix mInputs;
         private DoubleMatrix mExpected;
         private double mLambda;
-        private boolean mTrain;
         private IActivationFunction mActivationFunction;
         
         /**
@@ -65,7 +64,6 @@ public class NeuralNetwork {
             for (int index = 0; index < layerSizes.size(); index++) {
                 mLayerSizes[index] = layerSizes.get(index).intValue();
             }
-            mTrain = false;
             mLambda = 0.0;
         }
         
@@ -114,23 +112,6 @@ public class NeuralNetwork {
          */
         public Builder expectedValues(DoubleMatrix expected) {
             mExpected = expected;
-            return this;
-        }
-        
-        /**
-         * Notifies the builder that it should train the neural network on the 
-         * inputs and outputs provided when the neural network is built. The
-         * default training parameter is false, meaning it will simply 
-         * construct the neural network with the thetas provided. A value of
-         * true will instruct the builder to run forward propagation followed
-         * by back propagation on the specified inputs and outputs. It will
-         * also calculate the training cost and gradient for each of the theta
-         * layers
-         * 
-         * @return the builder for the neural network
-         */
-        public Builder train() {
-            mTrain = !mTrain;
             return this;
         }
         
