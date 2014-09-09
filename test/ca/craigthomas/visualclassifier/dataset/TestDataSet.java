@@ -8,6 +8,7 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 
+import org.jblas.DoubleMatrix;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -28,36 +29,44 @@ public class TestDataSet {
     public void testReadFromCSVFileNoTruthWorksCorrectly() throws IOException {
         mDataSet = new DataSet(false);
         mDataSet.addFromCSVFile(SAMPLE_FILE);
-        double [] expectedSamples = {
-                1.0, 1.0, 1.0,
-                1.0, 0.0, 0.0,
-                0.0, 1.0, 0.0,
-                0.0, 0.0, 0.0
-        };
+        DoubleMatrix expected = new DoubleMatrix(new double [][] {
+                {1.0, 1.0, 1.0},
+                {1.0, 0.0, 0.0},
+                {0.0, 1.0, 0.0},
+                {0.0, 0.0, 0.0}
+        });
 
+        assertFalse(mDataSet.hasTruth());
+        assertEquals(0, mDataSet.getNumColsTruth());
+        assertEquals(3, mDataSet.getNumColsSamples());
+        assertEquals(4, mDataSet.getNumSamples());
         assertTrue(mDataSet.getTruth() == null);
-        Assert.assertArrayEquals(expectedSamples, mDataSet.getSamples().toArray(), 0.0001);
+        Assert.assertArrayEquals(expected.toArray(), mDataSet.getSamples().toArray(), 0.0001);
     }
 
     @Test
     public void testReadFromCSVFileSeparatesTruthCorrectly() throws IOException {
         mDataSet = new DataSet(true);
         mDataSet.addFromCSVFile(SAMPLE_FILE);
-        double [] expectedSamples = {
-                1.0, 1.0,
-                1.0, 0.0,
-                0.0, 1.0,
-                0.0, 0.0,
-        };
-        
-        double [] expectedTruth = {
-                1.0,
-                0.0,
-                0.0,
-                0.0
-        };
+        DoubleMatrix expectedSamples = new DoubleMatrix(new double [][] {
+                {1.0, 1.0},
+                {1.0, 0.0},
+                {0.0, 1.0},
+                {0.0, 0.0}
+        });
 
-        Assert.assertArrayEquals(expectedTruth, mDataSet.getTruth().toArray(), 0.0001);
-        Assert.assertArrayEquals(expectedSamples, mDataSet.getSamples().toArray(), 0.0001);
+        DoubleMatrix expectedTruth = new DoubleMatrix(new double [][] {
+                {1.0},
+                {0.0},
+                {0.0},
+                {0.0}
+        });
+
+        assertTrue(mDataSet.hasTruth());
+        assertEquals(1, mDataSet.getNumColsTruth());
+        assertEquals(2, mDataSet.getNumColsSamples());
+        assertEquals(4, mDataSet.getNumSamples());
+        Assert.assertArrayEquals(expectedTruth.toArray(), mDataSet.getTruth().toArray(), 0.0001);
+        Assert.assertArrayEquals(expectedSamples.toArray(), mDataSet.getSamples().toArray(), 0.0001);
     }
 }

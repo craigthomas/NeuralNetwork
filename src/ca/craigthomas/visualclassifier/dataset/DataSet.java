@@ -122,13 +122,15 @@ public class DataSet {
         for (List<Double> row : samples) {
             Double [] temp = row.toArray(new Double[row.size()]);
             double [] sampleRow = ArrayUtils.toPrimitive(temp);
+            double [][] matrix = new double[1][sampleRow.length];
             if (sHasTruth) {
-                addSampleRow(new DoubleMatrix(
-                        ArrayUtils.subarray(sampleRow, 0, sampleRow.length-1)));
-                addTruthRow(new DoubleMatrix(
-                        ArrayUtils.subarray(sampleRow, sampleRow.length-1, sampleRow.length)));
+                matrix[0] = ArrayUtils.subarray(sampleRow, 0, sampleRow.length-1);
+                addSampleRow(new DoubleMatrix(matrix));
+                matrix[0] = ArrayUtils.subarray(sampleRow, sampleRow.length-1, sampleRow.length);
+                addTruthRow(new DoubleMatrix(matrix));
             } else {
-                addSampleRow(new DoubleMatrix(sampleRow));
+                matrix[0] = sampleRow;
+                addSampleRow(new DoubleMatrix(matrix));
             }
         } 
     }
