@@ -20,6 +20,8 @@ dependencies {
     compile 'args4j:args4j:2.0.29'
     compile 'org.boofcv:openkinect:0.17'
     compile 'org.jblas:jblas:1.2.3'
+    compile 'org.apache.commons:commons-csv:1.0'
+    compile 'commons-io:commons-io:2.4'
     testCompile 'junit:junit:4.11'
 }
 
@@ -42,6 +44,9 @@ sourceSets {
     test {
         java {
             srcDir 'test'
+        }
+        resources {
+            srcDir 'resources'
         }
     }
 }
