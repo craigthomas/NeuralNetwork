@@ -22,6 +22,7 @@ dependencies {
     compile 'org.jblas:jblas:1.2.3'
     compile 'org.apache.commons:commons-csv:1.0'
     compile 'commons-io:commons-io:2.4'
+    compile 'org.apache.commons:commons-lang3:3.3.2'
     testCompile 'junit:junit:4.11'
 }
 

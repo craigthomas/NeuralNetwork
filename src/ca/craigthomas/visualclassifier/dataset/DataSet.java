@@ -4,191 +4,151 @@
  */
 package ca.craigthomas.visualclassifier.dataset;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.jblas.DoubleMatrix;
 
 /**
- * The DataSet class is used to read data from a CSV file and optionally
- * split it into different sets (for example, test versus train). 
+ * The DataSet class is used to read data from various sources. The DataSet
+ * class keeps track of two types of data: the actual example inputs called
+ * Samples, and their optional output labels called Truth. 
  * 
  * @author thomas
  */
 public class DataSet {
     
-    private DoubleMatrix mExamples;
-    private DoubleMatrix mClasses;
-
+    private DoubleMatrix mSamples;
+    private DoubleMatrix mTruth;
+    private final boolean sHasTruth;
+    
     /**
-     * Builds a DataSet. Must supply the data to read from, such as a 
-     * CSV file.
+     * The DataSet constructor. If hasTruth is set to true, then the
+     * class will expect ground truth to be passed in with the data.
      * 
-     * @author thomas
+     * @param hasTruth whether the Samples have ground truth information
      */
-    public static class Builder {
-        
-        private boolean mHasClassLabel;
-        private DoubleMatrix mExamples;
-        private DoubleMatrix mClasses;
-        
-        public Builder () {
-            mHasClassLabel = false;
-        }
-        
-        /**
-         * Reads the data from the specified filename - assumes that the 
-         * data is in a CSV format.
-         * 
-         * @param filename the CSV file to read from
-         * @return the builder for the DataSet
-         * @throws IOException
-         */
-        public Builder fromCSV(String filename) throws IOException {
-            readCSVFile(filename);
-            return this;
-        }
-        
-        /**
-         * Indicates that the dataset in question has a class label data as
-         * the last column in the dataset.
-         * 
-         * @return the builder for the DataSet
-         */
-        public Builder hasClassLabel() {
-            mHasClassLabel = !mHasClassLabel;
-            return this;
-        }
-        
-        /**
-         * Constructs the DataSet.
-         * 
-         * @return the DataSet
-         */
-        public DataSet build() {
-            return new DataSet(this);
-        }
-        
-        /**
-         * Converts the set of inputs into a DoubleMatrix for examples, and
-         * if mHasClassLabel is set, the class names.
-         * 
-         * @param inputs the list of inputs to convert
-         */
-        private void addExamples(List<List<Double>> inputs) {
-            for (List<Double> inputLine : inputs) {
-                double [][] values = new double[1][inputLine.size()];
-                int index = 0;
-                for (Double value : inputLine) {
-                    values[0][index] = value.doubleValue();
-                    index++;
-                }
-                DoubleMatrix example = new DoubleMatrix(values);
-                if (mExamples == null) {
-                    mExamples = example;
-                } else {
-                    mExamples = DoubleMatrix.concatVertically(mExamples, example);
-                }
-            }
-        }
-        
-        /**
-         * Converts the set of classes into a DoubleMatrix of class labels.
-         * 
-         * @param classes the class labels to apply
-         */
-        private void addClasses(List<Double> classes) {
-            for (Double label : classes) {
-                double [][] value = new double[1][1];
-                value[0][0] = label.doubleValue();
-                DoubleMatrix classLabel = new DoubleMatrix(value);
-                if (mClasses == null) {
-                    mClasses = classLabel;
-                } else {
-                    mClasses = DoubleMatrix.concatVertically(mClasses, classLabel);
-                }
-            }
-        }
-
-        /**
-         * Generates a CSVParser for the specified filename.
-         * 
-         * @param filename the name of the file to parse
-         * @return a CSVParser for the file
-         * @throws IOException
-         */
-        private CSVParser createParser(String filename) throws IOException {
-            File file = new File(filename);
-            String fileContents = FileUtils.readFileToString(file);
-            Reader reader = new StringReader(fileContents);
-            return new CSVParser(reader, CSVFormat.EXCEL);            
-        }
-
-        /**
-         * Reads the contents of the CSV file, and loads the data into the
-         * example DoubleMatrix and class DoubleMatrix.
-         * 
-         * @param filename the name of the CSV file to open
-         * @throws IOException
-         */
-        private void readCSVFile(String filename) throws IOException {
-            CSVParser parser = createParser(filename);
-            
-            List<CSVRecord> records = parser.getRecords();
-            List<List<Double>> inputs = new ArrayList<List<Double>>();
-            List<Double> labels = new ArrayList<Double>();
-            
-            for (CSVRecord record : records) {
-                List<Double> inputLine = new ArrayList<Double>();
-                for (int index = 0; index < record.size(); index++) {
-                    String value = record.get(index);
-                    inputLine.add(Double.parseDouble(value));
-                }
-                if (mHasClassLabel) {
-                    labels.add(inputLine.remove(record.size() - 1));
-                }
-                inputs.add(inputLine);
-            }
-            addExamples(inputs);
-            if (mHasClassLabel) {
-                addClasses(labels);
-            }
-        }
+    public DataSet(boolean hasTruth) {
+        sHasTruth = hasTruth;
     }
     
     /**
-     * Builds the DataSet object.
+     * Returns the Samples.
      * 
-     * @param builder the builder for the DataSet
+     * @return the Samples
      */
-    private DataSet(Builder builder) {
-        mExamples = builder.mExamples;
-        mClasses = builder.mClasses;
+    public DoubleMatrix getSamples() {
+        return mSamples;
     }
     
     /**
-     * Returns the examples.
+     * Returns the ground truth.
      * 
-     * @return the examples
+     * @return the ground truth
      */
-    public DoubleMatrix getExamples() {
-        return mExamples;
+    public DoubleMatrix getTruth() {
+        return mTruth;
     }
     
     /**
-     * Returns the class labels.
+     * Get the number of columns in the Samples.
      * 
-     * @return the class labels
+     * @return the number of columns in the Samples
      */
-    public DoubleMatrix getLabels() {
-        return mClasses;
+    public int getNumColsSamples() {
+        if (mSamples == null) {
+            return 0;
+        }
+        return mSamples.columns;
+    }
+    
+    /**
+     * Returns the number of columns in the Truth data.
+     * 
+     * @return return the number of columns in the Truth data
+     */
+    public int getNumColsTruth() {
+        if (mTruth == null) {
+            return 0;
+        }
+        return mTruth.columns;
+    }
+    
+    /**
+     * Returns the number of samples (rows) in the DataSet.
+     * 
+     * @return the number of samples in the DataSet
+     */
+    public int getNumSamples() {
+        if (mSamples == null) {
+            return 0;
+        }
+        return mSamples.rows;
+    }
+    
+    /**
+     * Returns true if the DataSet has ground truth associated with it,
+     * false otherwise.
+     * 
+     * @return true if the DataSet has ground truth
+     */
+    public boolean hasTruth() {
+        return sHasTruth;
+    }
+    
+    /**
+     * Reads samples from a CSV file, and adds them to the DataSet. If header
+     * is set (true), will ignore the first line of the file.
+     * 
+     * @param filename the name of the file to read from
+     * @param hasHeader whether the file has a header line
+     * @throws IOException
+     */
+    public void addFromCSVFile(String filename) throws IOException {
+        List<List<Double>> data = DataSetReader.readCSVFile(filename);
+        addSamples(data);
+    }
+    
+    /**
+     * Adds a list of samples to the DataSet. Each element in the list contains
+     * a list of Doubles, which are assumed to be the samples to add. If the
+     * DataSet has ground truth, the last element in each of the list of samples
+     * is assumed to be the ground truth label.
+     * 
+     * @param samples the list of samples to add
+     */
+    public void addSamples(List<List<Double>> samples) {
+        for (List<Double> row : samples) {
+            Double [] temp = row.toArray(new Double[row.size()]);
+            double [] sampleRow = ArrayUtils.toPrimitive(temp);
+            if (sHasTruth) {
+                addSampleRow(new DoubleMatrix(
+                        ArrayUtils.subarray(sampleRow, 0, sampleRow.length-1)));
+                addTruthRow(new DoubleMatrix(
+                        ArrayUtils.subarray(sampleRow, sampleRow.length-1, sampleRow.length)));
+            } else {
+                addSampleRow(new DoubleMatrix(sampleRow));
+            }
+        } 
+    }
+
+    /**
+     * Internal helper function that will add a row of samples to the DataSet.
+     * 
+     * @param samples the matrix of samples to add
+     */
+    private void addSampleRow(DoubleMatrix samples) {
+        mSamples = (mSamples == null) ? samples : DoubleMatrix.concatVertically(mSamples, samples);
+    }
+    
+    /**
+     * Internal helper function that will add a row of ground truth labels
+     * to the DataSet.
+     * 
+     * @param truth the matrix of truth values to add
+     */
+    private void addTruthRow(DoubleMatrix truth) {
+        mTruth = (mTruth == null) ? truth : DoubleMatrix.concatVertically(mTruth, truth);
     }
 }
