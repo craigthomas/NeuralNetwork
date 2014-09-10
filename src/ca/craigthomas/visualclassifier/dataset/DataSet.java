@@ -163,15 +163,17 @@ public class DataSet {
      */
     public void randomize() {
         for (int counter = 0; counter < mSamples.rows * 5; counter++) {
-            int firstIndex = mRandom.nextInt(mSamples.rows + 1);
-            int secondIndex = mRandom.nextInt(mSamples.rows + 1);
+            int firstIndex = mRandom.nextInt(mSamples.rows);
+            int secondIndex = mRandom.nextInt(mSamples.rows);
             DoubleMatrix tempRow = mSamples.getRow(firstIndex);
-            mSamples.putRow(firstIndex, mSamples.getRow(secondIndex));
+            DoubleMatrix tempRow1 = mSamples.getRow(secondIndex);
+            mSamples.putRow(firstIndex, tempRow1);
             mSamples.putRow(secondIndex, tempRow);
             
             if (sHasTruth) {
                 tempRow = mTruth.getRow(firstIndex);
-                mTruth.putRow(firstIndex, mTruth.getRow(secondIndex));
+                tempRow1 = mTruth.getRow(secondIndex);
+                mTruth.putRow(firstIndex, tempRow1);
                 mTruth.putRow(secondIndex, tempRow);                
             }
         }

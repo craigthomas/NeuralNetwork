@@ -4,9 +4,14 @@
  */
 package ca.craigthomas.visualclassifier.dataset;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.jblas.DoubleMatrix;
@@ -181,5 +186,113 @@ public class TestDataSet {
         assertTrue(trainingTruth == null);
         Assert.assertArrayEquals(expectedTestingSamples.toArray(), testingSamples.toArray(), 0.0001);
         assertTrue(testingTruth == null);
+    }
+    
+    @Test
+    public void testRandomizeWorksCorrectly() throws IOException {
+        mDataSet = new DataSet(false);
+        List<List<Double>> samples = new ArrayList<List<Double>>();
+        Double [] newList = new Double [] {11.0, 12.0, 13.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {21.0, 22.0, 23.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {31.0, 32.0, 33.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {41.0, 42.0, 43.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {51.0, 52.0, 53.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {61.0, 62.0, 63.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {71.0, 72.0, 73.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {81.0, 82.0, 83.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {91.0, 92.0, 93.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {101.0, 102.0, 103.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {111.0, 112.0, 113.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {121.0, 122.0, 123.0};
+        samples.add(Arrays.asList(newList));
+        
+        mDataSet.addSamples(samples);
+        mDataSet.randomize();
+       
+        DoubleMatrix notExpected = new DoubleMatrix(new double [][] {
+                {11.0, 12.0, 13.0},
+                {21.0, 22.0, 23.0},
+                {31.0, 32.0, 33.0},
+                {41.0, 42.0, 43.0},
+                {51.0, 52.0, 53.0},
+                {61.0, 62.0, 63.0},
+                {71.0, 72.0, 73.0},
+                {81.0, 82.0, 83.0},
+                {91.0, 92.0, 93.0},
+                {101.0, 102.0, 103.0},
+                {111.0, 112.0, 113.0},
+                {121.0, 122.0, 123.0},
+        });
+
+        double [] result = mDataSet.getSamples().toArray();
+        double [] expected = notExpected.toArray();
+        assertTrue(Arrays.equals(expected, result));
+    }
+    
+    @Test
+    public void testRandomizePreservesTruth() throws IOException {
+        mDataSet = new DataSet(true);
+        List<List<Double>> samples = new ArrayList<List<Double>>();
+        Double [] newList = new Double [] {11.0, 12.0, 13.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {21.0, 22.0, 23.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {31.0, 32.0, 33.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {41.0, 42.0, 43.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {51.0, 52.0, 53.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {61.0, 62.0, 63.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {71.0, 72.0, 73.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {81.0, 82.0, 83.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {91.0, 92.0, 93.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {101.0, 102.0, 103.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {111.0, 112.0, 113.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {121.0, 122.0, 123.0};
+        samples.add(Arrays.asList(newList));
+        
+        mDataSet.addSamples(samples);
+        mDataSet.randomize();
+       
+        DoubleMatrix sampleData = mDataSet.getSamples();
+        DoubleMatrix truth = mDataSet.getTruth();
+        DoubleMatrix result = DoubleMatrix.concatHorizontally(sampleData, truth);
+        result.sortRowsi();
+
+        for (int index = 0; index < result.rows; index++) {
+            DoubleMatrix row = result.getRow(index);
+            assertTrue(
+                    Arrays.equals(row.toArray(), new double [] {11.0, 12.0, 13.0}) ||
+                    Arrays.equals(row.toArray(), new double [] {21.0, 22.0, 23.0}) ||
+                    Arrays.equals(row.toArray(), new double [] {31.0, 32.0, 33.0}) ||
+                    Arrays.equals(row.toArray(), new double [] {41.0, 42.0, 43.0}) ||
+                    Arrays.equals(row.toArray(), new double [] {51.0, 52.0, 53.0}) ||
+                    Arrays.equals(row.toArray(), new double [] {61.0, 62.0, 63.0}) ||
+                    Arrays.equals(row.toArray(), new double [] {71.0, 72.0, 73.0}) ||
+                    Arrays.equals(row.toArray(), new double [] {81.0, 82.0, 83.0}) ||
+                    Arrays.equals(row.toArray(), new double [] {91.0, 92.0, 93.0}) ||
+                    Arrays.equals(row.toArray(), new double [] {101.0, 102.0, 103.0}) ||
+                    Arrays.equals(row.toArray(), new double [] {111.0, 112.0, 113.0}) ||
+                    Arrays.equals(row.toArray(), new double [] {121.0, 122.0, 123.0})                    
+            );
+        }
     }
 }
