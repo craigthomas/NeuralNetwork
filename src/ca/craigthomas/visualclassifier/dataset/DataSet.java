@@ -6,8 +6,10 @@ package ca.craigthomas.visualclassifier.dataset;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jblas.DoubleMatrix;
 
 /**
@@ -22,6 +24,7 @@ public class DataSet {
     private DoubleMatrix mSamples;
     private DoubleMatrix mTruth;
     private final boolean sHasTruth;
+    private Random mRandom;
     
     /**
      * The DataSet constructor. If hasTruth is set to true, then the
@@ -31,6 +34,7 @@ public class DataSet {
      */
     public DataSet(boolean hasTruth) {
         sHasTruth = hasTruth;
+        mRandom = new Random();
     }
     
     /**
@@ -152,5 +156,76 @@ public class DataSet {
      */
     private void addTruthRow(DoubleMatrix truth) {
         mTruth = (mTruth == null) ? truth : DoubleMatrix.concatVertically(mTruth, truth);
+    }
+    
+    /**
+     * Randomizes the data points within the DataSet.
+     */
+    public void randomize() {
+        for (int counter = 0; counter < mSamples.rows * 5; counter++) {
+            int firstIndex = mRandom.nextInt(mSamples.rows + 1);
+            int secondIndex = mRandom.nextInt(mSamples.rows + 1);
+            DoubleMatrix tempRow = mSamples.getRow(firstIndex);
+            mSamples.putRow(firstIndex, mSamples.getRow(secondIndex));
+            mSamples.putRow(secondIndex, tempRow);
+            
+            if (sHasTruth) {
+                tempRow = mTruth.getRow(firstIndex);
+                mTruth.putRow(firstIndex, mTruth.getRow(secondIndex));
+                mTruth.putRow(secondIndex, tempRow);                
+            }
+        }
+    }
+    
+    /**
+     * A workaround for the JBlas library IntervalRange class - specifying 
+     * ranges that don't start at zero have a problem. Copy the given rows
+     * instead.
+     * 
+     * @param a the start of the range (inclusive)
+     * @param b the end of the range (exclusive)
+     * @param matrix the matrix to copy from
+     * @return a new matrix with the rows from a to b
+     */
+    protected static DoubleMatrix copyRows(int a, int b, DoubleMatrix matrix) {
+        DoubleMatrix result = null;
+        for (int index = a; index < b; index++) {
+            if (result == null) {
+                result = matrix.getRow(index).dup();
+            } else {
+                result = DoubleMatrix.concatVertically(result, matrix.getRow(index).dup());
+            }
+        }
+        return result;
+    }
+    
+    /**
+     * Splits a DataSet into two sets - a training and a testing set - based
+     * upon the percentage. For example, a percentage of 60 would allocate 
+     * 60% to the training set and 40% to the testing set. Returns a pair of 
+     * pairs - the first pair is the training set, the second pair is the
+     * testing set. Within the training and testing pairs, the first DoubleMatrix
+     * is the sample data, while the second DoubleMatrix are the ground truth
+     * values.
+     * 
+     * @param percentage the percentage to put into the training set
+     * @return a pair of pairs, where the left is training, right is testing
+     */
+    public Pair<Pair<DoubleMatrix, DoubleMatrix>, Pair<DoubleMatrix, DoubleMatrix>> split(int percentage) {
+        int trainStart = 0; 
+        int trainEnd = (int)((percentage / 100.0) * (float)mSamples.rows);
+        int testStart = trainEnd;
+        int testEnd = mSamples.rows;
+        DoubleMatrix trainingSamples = copyRows(trainStart, trainEnd, mSamples);
+        DoubleMatrix testingSamples = copyRows(testStart, testEnd, mSamples);
+        DoubleMatrix trainingTruth = null;
+        DoubleMatrix testingTruth = null;
+        if (sHasTruth) {
+            trainingTruth = copyRows(trainStart, trainEnd, mTruth);
+            testingTruth = copyRows(testStart, testEnd, mTruth);
+        }
+        Pair<DoubleMatrix, DoubleMatrix> trainingPair = Pair.of(trainingSamples, trainingTruth);
+        Pair<DoubleMatrix, DoubleMatrix> testingPair = Pair.of(testingSamples, testingTruth);
+        return Pair.of(trainingPair, testingPair);
     }
 }

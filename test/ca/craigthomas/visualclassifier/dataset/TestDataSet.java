@@ -8,6 +8,7 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.jblas.DoubleMatrix;
 import org.junit.Assert;
 import org.junit.Test;
@@ -78,5 +79,107 @@ public class TestDataSet {
         assertEquals(4, mDataSet.getNumSamples());
         Assert.assertArrayEquals(expectedTruth.toArray(), mDataSet.getTruth().toArray(), 0.0001);
         Assert.assertArrayEquals(expectedSamples.toArray(), mDataSet.getSamples().toArray(), 0.0001);
+    }
+
+    @Test
+    public void testGenerateRangeZeroRange() {
+        DoubleMatrix initMatrix = new DoubleMatrix(new double [][] {
+                {1.0, 2.0, 3.0},
+                {4.0, 5.0, 6.0},
+                {7.0, 8.0, 9.0},
+                {10.0, 11.0, 12.0}
+        });
+        int start = 0;
+        int end = 3;
+
+        DoubleMatrix expected = new DoubleMatrix(new double [][] {
+                {1.0, 2.0, 3.0},
+                {4.0, 5.0, 6.0},
+                {7.0, 8.0, 9.0}
+        });
+        
+        DoubleMatrix result = DataSet.copyRows(start, end, initMatrix);
+        
+        Assert.assertArrayEquals(expected.toArray(), result.toArray(), 0.001);
+    }
+
+    @Test
+    public void testGenerateRangeNonZeroBasedRange() {
+        DoubleMatrix initMatrix = new DoubleMatrix(new double [][] {
+                {1.0, 2.0, 3.0},
+                {4.0, 5.0, 6.0},
+                {7.0, 8.0, 9.0},
+                {10.0, 11.0, 12.0}
+        });
+        int start = 3;
+        int end = 4;
+        DoubleMatrix expected = new DoubleMatrix(new double [][] {
+                {10.0, 11.0, 12.0}
+        });
+        
+        DoubleMatrix result = DataSet.copyRows(start, end, initMatrix);
+        
+        Assert.assertArrayEquals(expected.toArray(), result.toArray(), 0.001);
+    }
+    
+    @Test
+    public void testSplitWorksCorrectlyWhenTruthExists() throws IOException {
+        mDataSet = new DataSet(true);
+        mDataSet.addFromCSVFile(SAMPLE_FILE);
+        DoubleMatrix expectedTrainingSamples = new DoubleMatrix(new double [][] {
+                {1.0, 1.0},
+                {1.0, 0.0},
+                {0.0, 1.0}
+        });
+
+        DoubleMatrix expectedTestingSamples = new DoubleMatrix(new double [][] {
+                {0.0, 0.0}
+        });
+
+        DoubleMatrix expectedTrainingTruth = new DoubleMatrix(new double [][] {
+                {1.0},
+                {0.0},
+                {0.0}
+        });
+        
+        DoubleMatrix expectedTestingTruth = new DoubleMatrix(new double [][] {
+                {0.0}
+        });     
+        Pair<Pair<DoubleMatrix, DoubleMatrix>, Pair<DoubleMatrix, DoubleMatrix>> result = mDataSet.split(75);
+        DoubleMatrix trainingSamples = result.getLeft().getLeft();
+        DoubleMatrix trainingTruth = result.getLeft().getRight();
+        DoubleMatrix testingSamples = result.getRight().getLeft();
+        DoubleMatrix testingTruth = result.getRight().getRight();
+        
+        Assert.assertArrayEquals(expectedTrainingSamples.toArray(), trainingSamples.toArray(), 0.0001);
+        Assert.assertArrayEquals(expectedTrainingTruth.toArray(), trainingTruth.toArray(), 0.0001);
+        Assert.assertArrayEquals(expectedTestingSamples.toArray(), testingSamples.toArray(), 0.0001);
+        Assert.assertArrayEquals(expectedTestingTruth.toArray(), testingTruth.toArray(), 0.0001);
+    }
+    
+    @Test
+    public void testSplitWorksCorrectlyWhenTruthDoesNotExists() throws IOException {
+        mDataSet = new DataSet(false);
+        mDataSet.addFromCSVFile(SAMPLE_FILE);
+        DoubleMatrix expectedTrainingSamples = new DoubleMatrix(new double [][] {
+                {1.0, 1.0, 1.0},
+                {1.0, 0.0, 0.0},
+                {0.0, 1.0, 0.0},
+        });
+
+        DoubleMatrix expectedTestingSamples = new DoubleMatrix(new double [][] {
+                {0.0, 0.0, 0.0}
+        });
+
+        Pair<Pair<DoubleMatrix, DoubleMatrix>, Pair<DoubleMatrix, DoubleMatrix>> result = mDataSet.split(75);
+        DoubleMatrix trainingSamples = result.getLeft().getLeft();
+        DoubleMatrix trainingTruth = result.getLeft().getRight();
+        DoubleMatrix testingSamples = result.getRight().getLeft();
+        DoubleMatrix testingTruth = result.getRight().getRight();
+        
+        Assert.assertArrayEquals(expectedTrainingSamples.toArray(), trainingSamples.toArray(), 0.0001);
+        assertTrue(trainingTruth == null);
+        Assert.assertArrayEquals(expectedTestingSamples.toArray(), testingSamples.toArray(), 0.0001);
+        assertTrue(testingTruth == null);
     }
 }
