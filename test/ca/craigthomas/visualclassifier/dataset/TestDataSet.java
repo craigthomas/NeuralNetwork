@@ -237,7 +237,7 @@ public class TestDataSet {
 
         double [] result = mDataSet.getSamples().toArray();
         double [] expected = notExpected.toArray();
-        assertTrue(Arrays.equals(expected, result));
+        assertFalse(Arrays.equals(expected, result));
     }
     
     @Test
