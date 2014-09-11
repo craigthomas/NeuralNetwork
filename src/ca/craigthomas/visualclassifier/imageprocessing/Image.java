@@ -84,13 +84,14 @@ public class Image {
      * 
      * @return a column vector of the pixel intensities
      */
-    public DoubleMatrix convertGrayscaleToMatrix() {
+    public DoubleMatrix convertGrayscaleToMatrix(double truth) {
         ImageUInt8 grayscale = ConvertImage.average(mImage, null);
         byte [] data = grayscale.getData();
-        DoubleMatrix result = new DoubleMatrix(1, data.length);
+        DoubleMatrix result = new DoubleMatrix(1, data.length + 1);
         for (int index = 0; index < data.length; index++) {
             result.put(0, index, (double)data[index]);
         }
+        result.put(0, data.length, truth * 255.0);
         return result.divi(255.0);
     }
     

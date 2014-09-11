@@ -295,4 +295,15 @@ public class TestDataSet {
             );
         }
     }
+    
+    @Test
+    public void testAddSampleWorksCorrectly() {
+        mDataSet = new DataSet(false);
+        DoubleMatrix sample = new DoubleMatrix(new double [][] {
+                {0.333, 0.333, 0.333, 1.0}
+        }); 
+        mDataSet.addSample(sample);
+        
+        Assert.assertArrayEquals(sample.toArray(), mDataSet.getSamples().toArray(), 0.0001);
+    }
 }

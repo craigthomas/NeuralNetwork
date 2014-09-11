@@ -30,6 +30,7 @@ public class Runner {
     @Argument(handler=SubCommandHandler.class)
     @SubCommands({
         @SubCommand(name="collect", impl=CollectCommand.class),
+        @SubCommand(name="train", impl=TrainCommand.class),
     })
     Command command;
     

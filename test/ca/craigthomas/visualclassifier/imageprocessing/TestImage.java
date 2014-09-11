@@ -59,10 +59,10 @@ public class TestImage {
     @Test
     public void testConvertGrayscaleToMatrixWorksCorrectly() {
         DoubleMatrix expected = new DoubleMatrix(new double [][] {
-                {0.3333, 0.3333, 0.3333}
+                {0.3333, 0.3333, 0.3333, 1.0}
         });
         mImage = new Image(mBufferedImage);
-        DoubleMatrix result = mImage.convertGrayscaleToMatrix();
+        DoubleMatrix result = mImage.convertGrayscaleToMatrix(1.0);
         Assert.assertArrayEquals(expected.toArray(), result.toArray(), 0.0001);
     }
     

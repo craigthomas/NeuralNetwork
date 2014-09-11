@@ -5,6 +5,8 @@
 package ca.craigthomas.visualclassifier.dataset;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -137,6 +139,21 @@ public class DataSet {
                 addSampleRow(new DoubleMatrix(matrix));
             }
         } 
+    }
+    
+    /**
+     * Adds a single row DoubleMatrix set of values to the list of samples.
+     *  
+     * @param sample the DoubleMatrix column vector to add
+     */
+    public void addSample(DoubleMatrix sample) {
+        List<List<Double>> newSampleList = new ArrayList<List<Double>>();
+        double [] values = new double [sample.columns];
+        for (int index = 0; index < sample.columns; index++) {
+            values[index] = sample.get(0, index);
+        }
+        newSampleList.add(Arrays.asList(ArrayUtils.toObject(values)));
+        addSamples(newSampleList);
     }
 
     /**
