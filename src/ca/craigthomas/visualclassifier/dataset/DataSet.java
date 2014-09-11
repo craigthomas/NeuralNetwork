@@ -27,6 +27,10 @@ public class DataSet {
     private DoubleMatrix mTruth;
     private final boolean sHasTruth;
     private Random mRandom;
+    private DoubleMatrix mTestingSamples;
+    private DoubleMatrix mTrainingSamples;
+    private DoubleMatrix mTestingTruth;
+    private DoubleMatrix mTrainingTruth;
     
     /**
      * The DataSet constructor. If hasTruth is set to true, then the
@@ -221,6 +225,37 @@ public class DataSet {
     /**
      * Splits a DataSet into two sets - a training and a testing set - based
      * upon the percentage. For example, a percentage of 60 would allocate 
+     * 60% to the training set and 40% to the testing set. 
+     * 
+     * @param percentage the percentage to put into the training set
+     */
+    public void splitData(int percentage) {
+        Pair<Pair<DoubleMatrix, DoubleMatrix>, Pair<DoubleMatrix, DoubleMatrix>> split = split(percentage);
+        mTrainingSamples = split.getLeft().getLeft();
+        mTestingSamples = split.getRight().getLeft();
+        mTrainingTruth = split.getLeft().getRight();
+        mTestingTruth = split.getRight().getRight();
+    }
+    
+    public DoubleMatrix getTrainingSet() {
+        return mTrainingSamples;
+    }
+    
+    public DoubleMatrix getTrainingTruth() {
+        return mTrainingTruth;
+    }
+    
+    public DoubleMatrix getTestingSet() {
+        return mTestingSamples;
+    }
+    
+    public DoubleMatrix getTestingTruth() {
+        return mTestingTruth;
+    }
+    
+    /**
+     * Splits a DataSet into two sets - a training and a testing set - based
+     * upon the percentage. For example, a percentage of 60 would allocate 
      * 60% to the training set and 40% to the testing set. Returns a pair of 
      * pairs - the first pair is the training set, the second pair is the
      * testing set. Within the training and testing pairs, the first DoubleMatrix
@@ -230,7 +265,7 @@ public class DataSet {
      * @param percentage the percentage to put into the training set
      * @return a pair of pairs, where the left is training, right is testing
      */
-    public Pair<Pair<DoubleMatrix, DoubleMatrix>, Pair<DoubleMatrix, DoubleMatrix>> split(int percentage) {
+    protected Pair<Pair<DoubleMatrix, DoubleMatrix>, Pair<DoubleMatrix, DoubleMatrix>> split(int percentage) {
         int trainStart = 0; 
         int trainEnd = (int)((percentage / 100.0) * (float)mSamples.rows);
         int testStart = trainEnd;

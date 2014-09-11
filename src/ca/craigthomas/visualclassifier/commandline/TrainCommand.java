@@ -6,16 +6,16 @@ package ca.craigthomas.visualclassifier.commandline;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.jblas.DoubleMatrix;
 import org.kohsuke.args4j.Option;
 
 import ca.craigthomas.visualclassifier.dataset.DataSet;
+import ca.craigthomas.visualclassifier.dataset.Prediction;
 import ca.craigthomas.visualclassifier.imageprocessing.Image;
 import ca.craigthomas.visualclassifier.nn.network.NeuralNetwork;
 import ca.craigthomas.visualclassifier.nn.trainer.Trainer;
@@ -35,7 +35,7 @@ public class TrainCommand extends Command {
     @Option(name="-b", usage="specifies heartbeat during training (default 100 iterations)")
     private int mHeartBeat = 100;
     
-    @Option(name="-a", usage="specifies learning rate (default 0.01)")
+    @Option(name="-l", usage="specifies learning rate (default 0.01)")
     private double mLearningRate = 0.01;
     
     @Option(name="-c", usage="loads data from a CSV file")
@@ -59,11 +59,29 @@ public class TrainCommand extends Command {
     @Option(name="-t", usage="prediction threshold (default 0.5)")
     private double mPredictionThreshold = 0.5;
     
+    @Option(name="-f", usage="generate this many folds for cross-validation (default 1)")
+    private int mFolds = 1;
+    
+    @Option(name="-l1", usage="specifies number of neurons in first hidden layer (default 10)")
+    private int mLayer1 = 10;
+    
+    @Option(name="-l2", usage="specifies number of neurons in second hidden layer (default 0)")
+    private int mLayer2 = 0;
+    
+    @Option(name="-o", usage="specifies number of neurons in output layer (default 1)")
+    private int mOutputLayer = 1;
+    
+    @Option(name="--lambda", usage="specifies lambda value (default 1.0)")
+    private double mLambda = 1.0;
+    
     private DataSet mDataSet;
     
     public TrainCommand() {
     }
     
+    /**
+     * Load the data from a CSV file.
+     */
     public void loadFromCSV() {
         mDataSet = new DataSet(true);
         try {
@@ -74,6 +92,13 @@ public class TrainCommand extends Command {
         }
     }
     
+    /**
+     * Load data from a directory. Assumes that all samples are images.
+     * The truth value indicates whether it is a positive or negative sample.
+     * 
+     * @param directory the directory to load images from
+     * @param truth whether the samples are positive or negative
+     */
     public void loadFromDirectory(File directory, double truth) {
         File [] files = directory.listFiles();
         for (File file : files) {
@@ -88,6 +113,9 @@ public class TrainCommand extends Command {
         }
     }
     
+    /**
+     * Loads up the files from the specified directories.
+     */
     public void loadFromDirectories() {
         File positiveDir = new File(mPositiveDir);
         File negativeDir = new File(mNegativeDir);
@@ -127,55 +155,34 @@ public class TrainCommand extends Command {
             LOGGER.log(Level.SEVERE, "no data set could be built, exiting");
             return;
         }
-        
         LOGGER.log(Level.INFO, "loaded " + mDataSet.getNumSamples() + " sample(s)");
         mDataSet.randomize();
-        Pair<Pair<DoubleMatrix, DoubleMatrix>, Pair<DoubleMatrix, DoubleMatrix>> trainingTestSplit = mDataSet.split(80);
-        DoubleMatrix trainingSamples = trainingTestSplit.getLeft().getLeft();
-        DoubleMatrix trainingTruth = trainingTestSplit.getLeft().getRight();
-        DoubleMatrix testingSamples = trainingTestSplit.getRight().getLeft();
-        DoubleMatrix testingTruth = trainingTestSplit.getRight().getRight();
-        List<Integer> layerSizes = Arrays.asList(3600, 10, 1);
+        mDataSet.splitData(80);
+
+        List<Integer> layerSizes = new ArrayList<Integer>();
+        layerSizes.add(mDataSet.getNumColsSamples());
+        if (mLayer1 != 0) {
+            layerSizes.add(mLayer1);
+        }
+        if (mLayer2 != 0) {
+            layerSizes.add(mLayer2);
+        }
+        layerSizes.add(mOutputLayer);
         
-        Trainer trainer = new Trainer.Builder(layerSizes, trainingSamples, trainingTruth).maxIterations(500).build();
+        Trainer trainer = new Trainer.Builder(layerSizes, mDataSet.getTrainingSet(), mDataSet.getTrainingTruth()).maxIterations(500).heartBeat(mHeartBeat).learningRate(mLearningRate).lambda(mLambda).build();
         LOGGER.log(Level.INFO, "training neural network...");
         trainer.train();
         
         NeuralNetwork model = trainer.getNeuralNetwork();
-        DoubleMatrix predictions = model.predict(testingSamples);
+        Prediction prediction = new Prediction(model, mPredictionThreshold);
+        prediction.predict(mDataSet);
         
-        double truePositives = 0.0;
-        double falsePositives = 0.0;
-        double trueNegatives = 0.0;
-        double falseNegatives = 0.0;
-        
-        for (int index = 0; index < predictions.rows; index++) {
-            int prediction = (predictions.get(index, 0) > mPredictionThreshold) ? 1 : 0;
-            int actual = (testingTruth.get(index, 0) > mPredictionThreshold) ? 1 : 0;
-            if (actual == 1) {
-                if (prediction == actual) {
-                    truePositives += 1.0;
-                } else {
-                    falseNegatives += 1.0;
-                }
-            } else {
-                if (prediction == actual) {
-                    trueNegatives += 1.0;
-                } else {
-                    falsePositives += 1.0;
-                }
-            }
-        }
-        
-        System.out.println("True Positives " + truePositives);
-        System.out.println("False Positives " + falsePositives);
-        System.out.println("True Negatives " + trueNegatives);
-        System.out.println("False Negatives " + falseNegatives);
-        
-        double precision = truePositives / (truePositives + falsePositives);
-        double recall = truePositives / (truePositives + falseNegatives);
-        
-        System.out.println("Precision " + precision);
-        System.out.println("Recall " + recall);
+        System.out.println("True Positives " + prediction.getTruePositives());
+        System.out.println("False Positives " + prediction.getFalsePositives());
+        System.out.println("True Negatives " + prediction.getTrueNegatives());
+        System.out.println("False Negatives " + prediction.getFalseNegatives());
+        System.out.println("Precision " + prediction.getPrecision());
+        System.out.println("Recall " + prediction.getRecall());
+        System.out.println("F1 " + prediction.getF1());
     }
 }
