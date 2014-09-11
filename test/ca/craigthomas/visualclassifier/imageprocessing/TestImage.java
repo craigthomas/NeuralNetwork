@@ -81,4 +81,9 @@ public class TestImage {
         result = resultImage.getBufferedImage();
         assertEquals(blue.getRGB(), result.getRGB(0, 0));
     }
+    
+    @Test (expected=IllegalArgumentException.class)
+    public void testCreateWithNullThrowsException() {
+        mImage = new Image((BufferedImage)null);
+    }
 }
