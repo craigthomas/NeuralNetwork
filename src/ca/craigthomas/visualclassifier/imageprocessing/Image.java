@@ -50,6 +50,29 @@ public class Image {
     }
     
     /**
+     * Creates a grayscale image from a column vector. Assumes values are in
+     * the range of 0 - 1.
+     * 
+     * @param imageData the pixel intensity values
+     * @param width the width of the image in pixels
+     * @param height the height of the image in pixels
+     */
+    public Image(DoubleMatrix imageData, int width, int height) {
+        ImageUInt8 grayscale = new ImageUInt8(width, height);
+        int counter = 0;
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int intensity = (int)(imageData.get(0, counter) * 255.0);
+                grayscale.set(x, y, intensity);
+                counter++;
+            }
+        }
+        BufferedImage bufferedImage = ConvertBufferedImage.convertTo(grayscale, null);
+        mImage = ConvertBufferedImage.convertFromMulti(bufferedImage, null, true, ImageUInt8.class);
+        sBufferedImageType = bufferedImage.getType();
+    }
+    
+    /**
      * Gets the width of the image in pixels.
      * 
      * @return the width of the image in pixels

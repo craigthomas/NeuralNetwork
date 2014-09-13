@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.imageio.ImageIO;
+
+import org.apache.commons.math3.stat.StatUtils;
 import org.jblas.DoubleMatrix;
 import org.kohsuke.args4j.Option;
 
@@ -30,7 +33,6 @@ public class TrainCommand extends Command {
 
     // The logger for the class
     private final static Logger LOGGER = Logger.getLogger(Runner.class.getName());
-    // Used to generate filenames for each picture taken
 
     @Option(name="-b", usage="specifies heartbeat during training (default 100 iterations)")
     private int mHeartBeat = 100;
@@ -53,8 +55,11 @@ public class TrainCommand extends Command {
     @Option(name="-h", usage="ensure images have specified height in pixels (default 10)")
     private int mRequiredHeight = 10;
     
-    @Option(name="-s", usage="save prediction results into specified directory")
+    @Option(name="--save", usage="save prediction results into specified directory")
     private String mSaveDir = "";
+    
+    @Option(name="-s", usage="splits the data between training and testing (default 80 training)")
+    private int mSplit = 80;
     
     @Option(name="-t", usage="prediction threshold (default 0.5)")
     private double mPredictionThreshold = 0.5;
@@ -74,6 +79,9 @@ public class TrainCommand extends Command {
     @Option(name="--lambda", usage="specifies lambda value (default 1.0)")
     private double mLambda = 1.0;
     
+    @Option(name="-i", usage="number of iterations (default 500)")
+    private int mIterations = 500;
+     
     private DataSet mDataSet;
     
     public TrainCommand() {
@@ -86,6 +94,7 @@ public class TrainCommand extends Command {
         mDataSet = new DataSet(true);
         try {
             mDataSet.addFromCSVFile(mCSVFile);
+            LOGGER.log(Level.INFO, "loaded " + mDataSet.getNumSamples() + " sample(s)");
         } catch(IOException e) {
             LOGGER.log(Level.SEVERE, e.getMessage());
             mDataSet = null;
@@ -133,18 +142,53 @@ public class TrainCommand extends Command {
         mDataSet = new DataSet(true);
         loadFromDirectory(positiveDir, 1.0);
         loadFromDirectory(negativeDir, 0.0);
+        LOGGER.log(Level.INFO, "loaded " + mDataSet.getNumSamples() + " sample(s)");
     }
     
-    public void saveResults(DoubleMatrix actual, DoubleMatrix predictions, DoubleMatrix samples) {
+    public void saveImage(Image image, File path, String filename) {
+        File saveFile = new File(path, filename);
+        try {
+            ImageIO.write(image.getBufferedImage(), "png", saveFile);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "could not save file [" + saveFile.getAbsolutePath() + "]");
+        }
+    }
+    
+    public void saveResults(NeuralNetwork bestModel, DataSet bestFold) {
         File directory = new File(mSaveDir);
         if (!directory.isDirectory()) {
             LOGGER.log(Level.SEVERE, "save directory [" + mSaveDir + "] is not a directory");
             return;
         }
-   }
+        
+        Prediction predictions = new Prediction(bestModel, mPredictionThreshold);
+        predictions.predict(bestFold);
+        DoubleMatrix falsePositives = predictions.getFalsePositiveSamples();
+        DoubleMatrix falseNegatives = predictions.getFalseNegativeSamples();
+        for (int i = 0; i < falsePositives.rows; i++) {
+            Image image = new Image(falsePositives.getRow(i), mRequiredWidth, mRequiredHeight);
+            saveImage(image, directory, "fp" + (i+1) + ".png");
+        }
+        for (int i = 0; i < falseNegatives.rows; i++) {
+            Image image = new Image(falseNegatives.getRow(i), mRequiredWidth, mRequiredHeight);
+            saveImage(image, directory, "fn" + (i+1) + ".png");
+        }
+    }
     
     @Override
     public void execute() {
+        NeuralNetwork bestModel = null;
+        DataSet bestFold = null;
+        double [] tp = new double [mFolds];
+        double [] fp = new double [mFolds];
+        double [] tn = new double [mFolds];
+        double [] fn = new double [mFolds];
+        double [] precision = new double [mFolds];
+        double [] recall = new double [mFolds];
+        double [] f1 = new double [mFolds];
+        double bestF1 = 0;
+        
+        // Step 1: create the dataset
         if (!mCSVFile.isEmpty()) {
             loadFromCSV();
         } else {
@@ -155,10 +199,8 @@ public class TrainCommand extends Command {
             LOGGER.log(Level.SEVERE, "no data set could be built, exiting");
             return;
         }
-        LOGGER.log(Level.INFO, "loaded " + mDataSet.getNumSamples() + " sample(s)");
-        mDataSet.randomize();
-        mDataSet.splitData(80);
-
+        
+        // Step 2: Generate layer information
         List<Integer> layerSizes = new ArrayList<Integer>();
         layerSizes.add(mDataSet.getNumColsSamples());
         if (mLayer1 != 0) {
@@ -169,20 +211,56 @@ public class TrainCommand extends Command {
         }
         layerSizes.add(mOutputLayer);
         
-        Trainer trainer = new Trainer.Builder(layerSizes, mDataSet.getTrainingSet(), mDataSet.getTrainingTruth()).maxIterations(500).heartBeat(mHeartBeat).learningRate(mLearningRate).lambda(mLambda).build();
-        LOGGER.log(Level.INFO, "training neural network...");
-        trainer.train();
+        // Step 3: generate the folds and train the model
+        for (int fold = 0; fold < mFolds; fold++) {
+            LOGGER.log(Level.INFO, "processing fold " + (fold+1));
+            LOGGER.log(Level.INFO, "randomizing dataset");
+            mDataSet.randomize();
+            LOGGER.log(Level.INFO, "generating training and testing sets");
+            mDataSet.splitData(mSplit);
+            LOGGER.log(Level.INFO, "training neural network...");            
+            Trainer trainer = new Trainer.Builder(layerSizes, mDataSet.getTrainingSet(), mDataSet.getTrainingTruth()).maxIterations(mIterations).heartBeat(mHeartBeat).learningRate(mLearningRate).lambda(mLambda).build();
+            trainer.train();
+            
+            // Step 4: evaluate each model
+            NeuralNetwork model = trainer.getNeuralNetwork();
+            Prediction prediction = new Prediction(model, mPredictionThreshold);
+            prediction.predict(mDataSet);
+            System.out.println("True Positives " + prediction.getTruePositives());
+            System.out.println("False Positives " + prediction.getFalsePositives());
+            System.out.println("True Negatives " + prediction.getTrueNegatives());
+            System.out.println("False Negatives " + prediction.getFalseNegatives());
+            System.out.println("Precision " + prediction.getPrecision());
+            System.out.println("Recall " + prediction.getRecall());
+            System.out.println("F1 " + prediction.getF1());
+            
+            tp[fold] = prediction.getTruePositives();
+            fp[fold] = prediction.getFalsePositives();
+            tn[fold] = prediction.getTrueNegatives();
+            fn[fold] = prediction.getFalseNegatives();
+            precision[fold] = prediction.getPrecision();
+            recall[fold] = prediction.getRecall();
+            f1[fold] = prediction.getF1();
+            if (f1[fold] > bestF1) {
+                bestModel = model;
+                bestFold = mDataSet.dup();
+                bestF1 = f1[fold];
+            }
+        }
         
-        NeuralNetwork model = trainer.getNeuralNetwork();
-        Prediction prediction = new Prediction(model, mPredictionThreshold);
-        prediction.predict(mDataSet);
+        // Step 6: save the best information to the specified directory
+        if (!mSaveDir.isEmpty()) {
+            saveResults(bestModel, bestFold);
+        }
         
-        System.out.println("True Positives " + prediction.getTruePositives());
-        System.out.println("False Positives " + prediction.getFalsePositives());
-        System.out.println("True Negatives " + prediction.getTrueNegatives());
-        System.out.println("False Negatives " + prediction.getFalseNegatives());
-        System.out.println("Precision " + prediction.getPrecision());
-        System.out.println("Recall " + prediction.getRecall());
-        System.out.println("F1 " + prediction.getF1());
+        // Step 5: compute the overall statistics
+        System.out.println("Overall Statistics");
+        System.out.println("True Positives " + StatUtils.mean(tp) + " (" + StatUtils.variance(tp) + ")");
+        System.out.println("False Positives " + StatUtils.mean(fp) + " (" + StatUtils.variance(fp) + ")");
+        System.out.println("True Negatives " + StatUtils.mean(tn) + " (" + StatUtils.variance(tn) + ")");
+        System.out.println("False Negatives " + StatUtils.mean(fn) + " (" + StatUtils.variance(fn) + ")");
+        System.out.println("Precision " + StatUtils.mean(precision) + " (" + StatUtils.variance(precision) + ")");
+        System.out.println("Recall " + StatUtils.mean(recall) + " (" + StatUtils.variance(recall) + ")");
+        System.out.println("F1 " + StatUtils.mean(f1) + " (" + StatUtils.variance(f1) + ")");
     }
 }

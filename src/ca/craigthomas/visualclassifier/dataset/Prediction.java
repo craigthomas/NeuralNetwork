@@ -90,8 +90,8 @@ public class Prediction {
      * @param samples the set of samples to predict
      */
     public void predict(DataSet samples) {
-        mSamples = samples.getTestingSet();
-        mTruth = samples.getTestingTruth();
+        mSamples = samples.getTestingSet().dup();
+        mTruth = samples.getTestingTruth().dup();
         DoubleMatrix predictions = mNeuralNetwork.predict(mSamples);
                 
         for (int index = 0; index < predictions.rows; index++) {

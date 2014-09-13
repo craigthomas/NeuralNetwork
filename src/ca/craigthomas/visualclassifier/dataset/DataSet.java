@@ -33,6 +33,31 @@ public class DataSet {
     private DoubleMatrix mTrainingTruth;
     
     /**
+     * Generates a new DataSet based upon current internal values.
+     * 
+     * @param trainingSamples
+     * @param trainingTruth
+     * @param testingSamples
+     * @param testingTruth
+     * @param hasTruth
+     * @param allSamples
+     * @param allTruth
+     */
+    private DataSet(DoubleMatrix trainingSamples, DoubleMatrix trainingTruth,
+            DoubleMatrix testingSamples, DoubleMatrix testingTruth,
+            boolean hasTruth, DoubleMatrix allSamples, DoubleMatrix allTruth)
+    {
+        mSamples = allSamples;
+        mTruth = allTruth;
+        mTrainingSamples = trainingSamples;
+        mTestingSamples = testingSamples;
+        mTrainingTruth = trainingTruth;
+        mTestingTruth = testingTruth;
+        sHasTruth = hasTruth;
+        mRandom = new Random();
+    }
+    
+    /**
      * The DataSet constructor. If hasTruth is set to true, then the
      * class will expect ground truth to be passed in with the data.
      * 
@@ -281,5 +306,16 @@ public class DataSet {
         Pair<DoubleMatrix, DoubleMatrix> trainingPair = Pair.of(trainingSamples, trainingTruth);
         Pair<DoubleMatrix, DoubleMatrix> testingPair = Pair.of(testingSamples, testingTruth);
         return Pair.of(trainingPair, testingPair);
+    }
+    
+    /**
+     * Duplicate this DataSet.
+     * 
+     * @return a duplicate of this DataSet
+     */
+    public DataSet dup() {
+        return new DataSet(mTrainingSamples.dup(), mTrainingTruth.dup(),
+            mTestingSamples.dup(), mTestingTruth.dup(), sHasTruth,
+            mSamples.dup(), mTruth.dup());
     }
 }
