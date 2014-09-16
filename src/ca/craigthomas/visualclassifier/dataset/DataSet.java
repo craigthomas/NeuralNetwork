@@ -262,18 +262,39 @@ public class DataSet {
         mTestingTruth = split.getRight().getRight();
     }
     
+    /**
+     * Gets the data associated with the training set portion of the data
+     * set.
+     * 
+     * @return the training set data
+     */
     public DoubleMatrix getTrainingSet() {
         return mTrainingSamples;
     }
     
+    /**
+     * Gets the list of truth values associated with the training set.
+     * 
+     * @return the training set truth data
+     */
     public DoubleMatrix getTrainingTruth() {
         return mTrainingTruth;
     }
     
+    /**
+     * Gets the data associated with the testing set portion of the data set.
+     * 
+     * @return the testing set data
+     */
     public DoubleMatrix getTestingSet() {
         return mTestingSamples;
     }
     
+    /**
+     * Gets the list of truth values associated with the testing set.
+     * 
+     * @return the testing set truth data
+     */
     public DoubleMatrix getTestingTruth() {
         return mTestingTruth;
     }
