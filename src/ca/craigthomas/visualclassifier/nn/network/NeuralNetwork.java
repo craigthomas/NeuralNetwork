@@ -375,4 +375,14 @@ public class NeuralNetwork {
         return mActivations[mLayerSizes.length - 1];
     }
     
+    /**
+     * Returns the activation function that computes the activation along 
+     * network edges.
+     * 
+     * @return the current activation function
+     */
+    public IActivationFunction getActivationFunction() {
+        return mActivationFunction;
+    }
+    
 }

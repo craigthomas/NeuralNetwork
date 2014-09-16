@@ -167,6 +167,7 @@ public class Trainer {
         mRecordCosts = builder.mRecordCosts;
         mMaxIterations = builder.mMaxIterations;
         mHeartBeat = builder.mHeartBeat;
+        mCosts = new ArrayList<Double>();
     }
     
     /**
@@ -231,6 +232,15 @@ public class Trainer {
      */
     public NeuralNetwork getNeuralNetwork() {
         return mNeuralNetwork;
+    }
+    
+    /**
+     * Returns the costs associated with each iteration of training.
+     * 
+     * @return the list of training costs
+     */
+    public List<Double> getCosts() {
+        return mCosts;
     }
     
 }

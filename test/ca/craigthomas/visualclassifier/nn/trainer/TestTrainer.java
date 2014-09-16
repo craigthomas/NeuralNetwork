@@ -4,14 +4,20 @@
  */
 package ca.craigthomas.visualclassifier.nn.trainer;
 
+import static org.junit.Assert.*;
+
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.jblas.DoubleMatrix;
 import org.junit.Assert;
 import org.junit.Test;
 
+import ca.craigthomas.visualclassifier.nn.activation.HyperbolicTangent;
+import ca.craigthomas.visualclassifier.nn.activation.IActivationFunction;
 import ca.craigthomas.visualclassifier.nn.network.NeuralNetwork;
 import ca.craigthomas.visualclassifier.nn.trainer.Trainer;
 
@@ -186,5 +192,109 @@ public class TestTrainer {
         }
         DoubleMatrix predictions = network.predict(testInputs);
         Assert.assertArrayEquals(testOutputs.toArray(), predictions.toArray(), 0.15);
+    }
+    
+    @Test
+    public void testActivationFunctionSentToNeuralNetwork() {
+        mLayerSizes = Arrays.asList(2, 1);
+        IActivationFunction activationFunction = new HyperbolicTangent();
+        DoubleMatrix inputs = DoubleMatrix.ones(500, 2);
+        DoubleMatrix outputs = DoubleMatrix.ones(500, 1);
+        
+        mTrainer = new Trainer.Builder(mLayerSizes, inputs, outputs)
+        .learningRate(0.001).maxIterations(0).heartBeat(0)
+        .activationFunction(activationFunction).build();
+        mTrainer.train();
+
+        assertEquals(activationFunction, mTrainer.getNeuralNetwork().getActivationFunction());
+    }
+    
+    @Test
+    public void testRecordCostsRecordsAllIterations() {
+        Random random = new Random();
+        mLayerSizes = Arrays.asList(2, 1);
+        DoubleMatrix inputs = DoubleMatrix.ones(500, 2);
+        DoubleMatrix outputs = DoubleMatrix.ones(500, 1);
+        
+        for (int index = 0; index < 500; index++) {
+            double value1 = (double)random.nextInt(100) + 1;
+            double value2 = (double)random.nextInt(100) + 1;
+            
+            if (value1 > 50.0) {
+                inputs.put(index, 0, 1.0);
+            } else {
+                inputs.put(index, 0, 0.0);
+            }
+            
+            if (value2 > 50.0) {
+                inputs.put(index, 1, 1.0);
+            } else {
+                inputs.put(index, 1, 0.0);
+            }
+            
+            if (value1 > 50.0 || value2 > 50.0) {
+                outputs.put(index, 0, 1.0);
+            } else {
+                outputs.put(index, 0, 0.0);
+            }
+        }
+        
+        mTrainer = new Trainer.Builder(mLayerSizes, inputs, outputs)
+        .learningRate(0.001).maxIterations(200).heartBeat(0)
+        .recordCosts().build();
+        mTrainer.train();
+        
+        List<Double> costs = mTrainer.getCosts();
+
+        assertEquals(200, costs.size());
+        for (int i = 0; i < costs.size(); i++) {
+            assertTrue(costs.get(i).doubleValue() > 0.0);
+        }
+    }
+    
+    @Test
+    public void testHeartbeatOutputToConsole() {
+        Random random = new Random();
+        mLayerSizes = Arrays.asList(2, 1);
+        DoubleMatrix inputs = DoubleMatrix.ones(500, 2);
+        DoubleMatrix outputs = DoubleMatrix.ones(500, 1);
+        
+        for (int index = 0; index < 500; index++) {
+            double value1 = (double)random.nextInt(100) + 1;
+            double value2 = (double)random.nextInt(100) + 1;
+            
+            if (value1 > 50.0) {
+                inputs.put(index, 0, 1.0);
+            } else {
+                inputs.put(index, 0, 0.0);
+            }
+            
+            if (value2 > 50.0) {
+                inputs.put(index, 1, 1.0);
+            } else {
+                inputs.put(index, 1, 0.0);
+            }
+            
+            if (value1 > 50.0 || value2 > 50.0) {
+                outputs.put(index, 0, 1.0);
+            } else {
+                outputs.put(index, 0, 0.0);
+            }
+        }
+        
+        ByteArrayOutputStream stdOut = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(stdOut));
+        
+        mTrainer = new Trainer.Builder(mLayerSizes, inputs, outputs)
+        .learningRate(0.001).maxIterations(200).heartBeat(1)
+        .recordCosts().build();
+        mTrainer.train();
+        
+        String standardOut = stdOut.toString();
+        String [] strings = standardOut.split("\\n");
+        assertEquals(200, strings.length);
+        for (int i = 0; i < strings.length; i++) {
+            assertTrue(strings[i].contains("Iteration: " + (i+1)));
+        }
     }
 }
