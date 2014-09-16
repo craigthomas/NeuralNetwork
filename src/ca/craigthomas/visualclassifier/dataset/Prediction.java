@@ -18,10 +18,10 @@ import ca.craigthomas.visualclassifier.nn.network.NeuralNetwork;
  */
 public class Prediction {
     
-    private static final int TRUE_POS = 1;
-    private static final int TRUE_NEG = 2;
-    private static final int FALSE_POS = 3;
-    private static final int FALSE_NEG = 4;
+    protected static final int TRUE_POS = 1;
+    protected static final int TRUE_NEG = 2;
+    protected static final int FALSE_POS = 3;
+    protected static final int FALSE_NEG = 4;
 
     private NeuralNetwork mNeuralNetwork;
     private DoubleMatrix mSamples;
@@ -61,7 +61,7 @@ public class Prediction {
      * @param sample the sample to save
      * @param type the type of sample it is
      */
-    private void saveSampleToClass(DoubleMatrix sample, int type) {
+    protected void saveSampleToClass(DoubleMatrix sample, int type) {
         switch (type) {
         case TRUE_POS:
             mTruePositiveSamples = (mTruePositiveSamples == null) ? sample : DoubleMatrix.concatVertically(mTruePositiveSamples, sample);
