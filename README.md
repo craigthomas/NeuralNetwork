@@ -14,8 +14,8 @@ a deer exists in the picture or not.
 The project contains code to:
 
 * Take a set number of pictures with the Kinect camera
-* Train a machine learning model to detect deer within a set of pictures
-* Use the Kinect to determine if a picture contains a deer
+* Train a machine learning model to detect an object within a set of pictures
+* Use the Kinect to determine if a picture contains the object
 
 For more information on the project, [read my blog posts on the
 project](http://craigthomas.ca/blog/2014/08/04/deer-detection-with-machine-learning-part-1/)
@@ -89,17 +89,78 @@ Saving files to a different path:
     java -jar build/libs/visualclassifier-0.1.jar collect -p /path/to/save/to
 
 
-## Current Status - August 7, 2014
+### Training the NeuralNetwork
+
+The `train` sub-command allows you to train a neural network with a group
+of images contained within a set of directories. The positive examples must
+be contained in one directory, and the negative examples must be contained
+within another. The images can be in any valid image format. They must all 
+be the same width and height. For training, you must also split the dataset
+into a training / testing fold. Assuming that images are 60 pixels by 60 pixels,
+and you wish to use 80% of the data set for training, and 20% for testing:
+
+    java -jar build/libs/visualclassifier-0.1.jar train -p /path/to/positives \
+         -n /path/to/negatives -w 60 -h 60 -s 80
+
+You can also set the learning rate with `-l`:
+
+    java -jar build/libs/visualclassifier-0.1.jar train -p /path/to/positives \
+         -n /path/to/negatives -w 60 -h 60 -s 80 -l 0.001
+
+By default, the network trains for 500 iterations. You can change that with the
+`-i` option:
+
+    java -jar build/libs/visualclassifier-0.1.jar train -p /path/to/positives \
+         -n /path/to/negatives -w 60 -h 60 -s 80 -i 1000
+
+During training, you can have the network output periodic messages containing
+the cost for that iteration. This is known as a heartbeat. The heartbeat will
+display information after the specified number of iterations with the `-h`
+option. To display after 100 iterations:
+
+    java -jar build/libs/visualclassifier-0.1.jar train -p /path/to/positives \
+         -n /path/to/negatives -w 60 -h 60 -s 80 -h 100
+
+You can also use k-fold cross validation. You can specify the number of folds to
+randomly be built from the dataset with the `-f` option. For example, to perform
+10-fold cross validation:
+
+    java -jar build/libs/visualclassifier-0.1.jar train -p /path/to/positives \
+         -n /path/to/negatives -w 60 -h 60 -s 80 -f 10
+
+You can specify the number of nodes (neurons) to use in each layer of the network,
+up to a maximum of 2 hidden layers with `-l1` for layer 1, and `-l2` for layer 2.
+For example, to create a network with a hidden layer containing 20 nodes:
+
+    java -jar build/libs/visualclassifier-0.1.jar train -p /path/to/positives \
+         -n /path/to/negatives -w 60 -h 60 -s 80 -l1 20
+
+When making predictions, the network uses a threshold of 0.5. This means that 
+values over 0.5 will be predicted as positive, and under 0.5 will be predicted
+as negative. You can change the threshold with the `-t` option:
+
+    java -jar build/libs/visualclassifier-0.1.jar train -p /path/to/positives \
+         -n /path/to/negatives -w 60 -h 60 -s 80 -t 0.7
+
+You can also save the false positive and false negative images to a sub-directory
+with the `--save` option. The directory must exist, and must be writable. Images
+will take on the name `fp` for False Positive, and `fn` for False Negative.
+
+
+## Current Status - September 15,2014
 
 ### Operational
 
 - Taking pictures with a delay and saving them as JPG files
 - Taking pictures using the IR camera and saving them as JPG files
+- The neural network classifier
+- The ability to train the neural network classifier
+- The neural network predictor
 
 ### Yet to be Implemented
 
-- The machine learning classifier
-- The machine learning predictor
+- Saving the generated model to disk for future use
+- Scanning an image for instances of the object
 
 
 ## Third Party Licenses and Attributions
@@ -174,3 +235,31 @@ This project makes use of BoofCV, which is licensed under the Apache License,
 Version 2.0. The license can be downloaded from 
 http://www.apache.org/licenses/LICENSE-2.0.txt. The source code for this
 software is available from https://github.com/lessthanoptimal/BoofCV
+
+### Apache Commons CSV
+
+This project makes use of the Apache Commons CSV, which is licensed under the
+Apache License, Version 2.0. The license can be downloaded from
+http://www.apache.org/licenses/LICENSE-2.0.txt. The source code for this
+software is available from http://commons.apache.org/proper/commons-csv/
+
+### Apache Commons IO
+
+This project makes use of the Apache Commons IO, which is licensed under the
+Apache License, Version 2.0. The license can be downloaded from
+http://www.apache.org/licenses/LICENSE-2.0.txt. The source code for this
+software is available from http://commons.apache.org/proper/commons-io/
+
+### Apache Commons Lang
+
+This project makes use of the Apache Commons Lang, which is licensed under the
+Apache License, Version 2.0. The license can be downloaded from
+http://www.apache.org/licenses/LICENSE-2.0.txt. The source code for this
+software is available from http://commons.apache.org/proper/commons-lang/
+
+### Apache Commons Math
+
+This project makes use of the Apache Commons Math, which is licensed under the
+Apache License, Version 2.0. The license can be downloaded from
+http://www.apache.org/licenses/LICENSE-2.0.txt. The source code for this
+software is available from http://commons.apache.org/proper/commons-math/
