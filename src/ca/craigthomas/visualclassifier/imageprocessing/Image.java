@@ -57,19 +57,36 @@ public class Image {
      * @param width the width of the image in pixels
      * @param height the height of the image in pixels
      */
-    public Image(DoubleMatrix imageData, int width, int height) {
-        ImageUInt8 grayscale = new ImageUInt8(width, height);
-        int counter = 0;
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int intensity = (int)(imageData.get(0, counter) * 255.0);
-                grayscale.set(x, y, intensity);
-                counter++;
+    public Image(DoubleMatrix imageData, int width, int height, boolean color) {
+        if (color) {
+            mImage = new MultiSpectral<ImageUInt8>(ImageUInt8.class, width, height, 3);
+            int counter = 0;
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int red = (int)(imageData.get(0, counter) * 255.0);
+                    int green = (int)(imageData.get(0, counter+1) * 255.0);
+                    int blue = (int)(imageData.get(0, counter+2) * 255.0);
+                    mImage.getBand(0).set(x, y, red);
+                    mImage.getBand(1).set(x, y, green);
+                    mImage.getBand(2).set(x, y, blue);
+                    counter += 3;
+                }
             }
+            sBufferedImageType = BufferedImage.TYPE_INT_RGB;
+        } else {
+            ImageUInt8 grayscale = new ImageUInt8(width, height);
+            int counter = 0;
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int intensity = (int)(imageData.get(0, counter) * 255.0);
+                    grayscale.set(x, y, intensity);
+                    counter++;
+                }
+            }
+            BufferedImage bufferedImage = ConvertBufferedImage.convertTo(grayscale, null);
+            mImage = ConvertBufferedImage.convertFromMulti(bufferedImage, null, true, ImageUInt8.class);
+            sBufferedImageType = bufferedImage.getType();            
         }
-        BufferedImage bufferedImage = ConvertBufferedImage.convertTo(grayscale, null);
-        mImage = ConvertBufferedImage.convertFromMulti(bufferedImage, null, true, ImageUInt8.class);
-        sBufferedImageType = bufferedImage.getType();
     }
     
     /**
@@ -105,6 +122,7 @@ public class Image {
      * Converts the image pixel intensities into a single column vector. 
      * First converts the image into a grayscale picture.
      * 
+     * @param truth whether this is a positive or negative example
      * @return a column vector of the pixel intensities
      */
     public DoubleMatrix convertGrayscaleToMatrix(double truth) {
@@ -115,6 +133,31 @@ public class Image {
             result.put(0, index, (double)data[index]);
         }
         result.put(0, data.length, truth * 255.0);
+        return result.divi(255.0);
+    }
+    
+    /**
+     * Converts an RGB image into a single column vector. There will be
+     * 3 bands of color interleaved in the columns. The data for the first
+     * pixel will be in columns 0, 1, 2 - corresponding to the red, green
+     * and blue components respectively.
+     * 
+     * @param truth whether this is a positive or negative example
+     * @return a column vector of the pixel intensities
+     */
+    public DoubleMatrix convertColorToMatrix(double truth) {
+        byte [] red = mImage.getBand(0).getData();
+        byte [] green = mImage.getBand(1).getData();
+        byte [] blue = mImage.getBand(2).getData();
+        DoubleMatrix result = new DoubleMatrix(1, (red.length * 3) + 1);
+        int counter = 0;
+        for (int index = 0; index < red.length; index++) {
+            result.put(0, counter, (double)red[index]);
+            result.put(0, counter+1, (double)green[index]);
+            result.put(0, counter+2, (double)blue[index]);
+            counter += 3;
+        }
+        result.put(0, result.columns - 1, truth * 255.0);
         return result.divi(255.0);
     }
     

@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.stat.StatUtils;
 import org.jblas.DoubleMatrix;
 import org.kohsuke.args4j.Option;
@@ -42,6 +43,9 @@ public class TrainCommand extends Command {
     
     @Option(name="-c", usage="loads data from a CSV file")
     private String mCSVFile = "";
+    
+    @Option(name="--color", usage="processes images in color")
+    private boolean mColor = false;
     
     @Option(name="-p", usage="specifies positive image directory")
     private String mPositiveDir = "";
@@ -117,7 +121,11 @@ public class TrainCommand extends Command {
             if (image.getWidth() != mRequiredWidth || image.getHeight() != mRequiredHeight) {
                 LOGGER.log(Level.WARNING, "file " + filename + " not correct size, skipping (want " + mRequiredWidth + "x" + mRequiredHeight + ", got " + image.getWidth() + "x" + image.getHeight() + ")");
             } else {
-                mDataSet.addSample(image.convertGrayscaleToMatrix(truth));
+                if (mColor) {
+                    mDataSet.addSample(image.convertColorToMatrix(truth));
+                } else {
+                    mDataSet.addSample(image.convertGrayscaleToMatrix(truth));                    
+                }
             }
         }
     }
@@ -166,11 +174,11 @@ public class TrainCommand extends Command {
         DoubleMatrix falsePositives = predictions.getFalsePositiveSamples();
         DoubleMatrix falseNegatives = predictions.getFalseNegativeSamples();
         for (int i = 0; i < falsePositives.rows; i++) {
-            Image image = new Image(falsePositives.getRow(i), mRequiredWidth, mRequiredHeight);
+            Image image = new Image(falsePositives.getRow(i), mRequiredWidth, mRequiredHeight, mColor);
             saveImage(image, directory, "fp" + (i+1) + ".png");
         }
         for (int i = 0; i < falseNegatives.rows; i++) {
-            Image image = new Image(falseNegatives.getRow(i), mRequiredWidth, mRequiredHeight);
+            Image image = new Image(falseNegatives.getRow(i), mRequiredWidth, mRequiredHeight, mColor);
             saveImage(image, directory, "fn" + (i+1) + ".png");
         }
     }
@@ -217,15 +225,17 @@ public class TrainCommand extends Command {
             LOGGER.log(Level.INFO, "randomizing dataset");
             mDataSet.randomize();
             LOGGER.log(Level.INFO, "generating training and testing sets");
-            mDataSet.splitData(mSplit);
+            Pair<DataSet, DataSet> split = mDataSet.splitSequentially(mSplit);
+            DataSet trainingData = split.getLeft();
+            DataSet testingData = split.getRight();
             LOGGER.log(Level.INFO, "training neural network...");            
-            Trainer trainer = new Trainer.Builder(layerSizes, mDataSet.getTrainingSet(), mDataSet.getTrainingTruth()).maxIterations(mIterations).heartBeat(mHeartBeat).learningRate(mLearningRate).lambda(mLambda).build();
+            Trainer trainer = new Trainer.Builder(layerSizes, trainingData).maxIterations(mIterations).heartBeat(mHeartBeat).learningRate(mLearningRate).lambda(mLambda).build();
             trainer.train();
             
             // Step 4: evaluate each model
             NeuralNetwork model = trainer.getNeuralNetwork();
             Prediction prediction = new Prediction(model, mPredictionThreshold);
-            prediction.predict(mDataSet);
+            prediction.predict(testingData);
             System.out.println("True Positives " + prediction.getTruePositives());
             System.out.println("False Positives " + prediction.getFalsePositives());
             System.out.println("True Negatives " + prediction.getTrueNegatives());

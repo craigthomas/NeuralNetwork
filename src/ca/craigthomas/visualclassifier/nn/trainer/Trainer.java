@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.jblas.DoubleMatrix;
 
+import ca.craigthomas.visualclassifier.dataset.DataSet;
 import ca.craigthomas.visualclassifier.nn.activation.IActivationFunction;
 import ca.craigthomas.visualclassifier.nn.network.NeuralNetwork;
 
@@ -63,6 +64,17 @@ public class Trainer {
             mInputs = inputs;
             mOutputs = outputs;
             mLearningRate = DEFAULT_LEARNING_RATE;
+        }
+        
+        /**
+         * Alternate constructor to build a neural network with a DataSet 
+         * instead of inputs and outputs.
+         * 
+         * @param layerSizes the sizes of each of the network layers
+         * @param trainingData the training data set to use
+         */
+        public Builder(List<Integer> layerSizes, DataSet trainingData) {
+            this(layerSizes, trainingData.getSamples(), trainingData.getTruth());
         }
         
         /**

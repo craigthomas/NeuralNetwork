@@ -27,32 +27,18 @@ public class DataSet {
     private DoubleMatrix mTruth;
     private final boolean sHasTruth;
     private Random mRandom;
-    private DoubleMatrix mTestingSamples;
-    private DoubleMatrix mTrainingSamples;
-    private DoubleMatrix mTestingTruth;
-    private DoubleMatrix mTrainingTruth;
     
     /**
      * Generates a new DataSet based upon current internal values.
      * 
-     * @param trainingSamples
-     * @param trainingTruth
-     * @param testingSamples
-     * @param testingTruth
-     * @param hasTruth
-     * @param allSamples
-     * @param allTruth
+     * @param hasTruth whether the true values are known for the class
+     * @param samples the samples for the DataSet
+     * @param truth the truth values for the DataSet
      */
-    private DataSet(DoubleMatrix trainingSamples, DoubleMatrix trainingTruth,
-            DoubleMatrix testingSamples, DoubleMatrix testingTruth,
-            boolean hasTruth, DoubleMatrix allSamples, DoubleMatrix allTruth)
+    private DataSet(boolean hasTruth, DoubleMatrix samples, DoubleMatrix truth)
     {
-        mSamples = allSamples;
-        mTruth = allTruth;
-        mTrainingSamples = trainingSamples;
-        mTestingSamples = testingSamples;
-        mTrainingTruth = trainingTruth;
-        mTestingTruth = testingTruth;
+        mSamples = samples;
+        mTruth = truth;
         sHasTruth = hasTruth;
         mRandom = new Random();
     }
@@ -250,68 +236,14 @@ public class DataSet {
     /**
      * Splits a DataSet into two sets - a training and a testing set - based
      * upon the percentage. For example, a percentage of 60 would allocate 
-     * 60% to the training set and 40% to the testing set. 
-     * 
-     * @param percentage the percentage to put into the training set
-     */
-    public void splitData(int percentage) {
-        Pair<Pair<DoubleMatrix, DoubleMatrix>, Pair<DoubleMatrix, DoubleMatrix>> split = split(percentage);
-        mTrainingSamples = split.getLeft().getLeft();
-        mTestingSamples = split.getRight().getLeft();
-        mTrainingTruth = split.getLeft().getRight();
-        mTestingTruth = split.getRight().getRight();
-    }
-    
-    /**
-     * Gets the data associated with the training set portion of the data
-     * set.
-     * 
-     * @return the training set data
-     */
-    public DoubleMatrix getTrainingSet() {
-        return mTrainingSamples;
-    }
-    
-    /**
-     * Gets the list of truth values associated with the training set.
-     * 
-     * @return the training set truth data
-     */
-    public DoubleMatrix getTrainingTruth() {
-        return mTrainingTruth;
-    }
-    
-    /**
-     * Gets the data associated with the testing set portion of the data set.
-     * 
-     * @return the testing set data
-     */
-    public DoubleMatrix getTestingSet() {
-        return mTestingSamples;
-    }
-    
-    /**
-     * Gets the list of truth values associated with the testing set.
-     * 
-     * @return the testing set truth data
-     */
-    public DoubleMatrix getTestingTruth() {
-        return mTestingTruth;
-    }
-    
-    /**
-     * Splits a DataSet into two sets - a training and a testing set - based
-     * upon the percentage. For example, a percentage of 60 would allocate 
      * 60% to the training set and 40% to the testing set. Returns a pair of 
-     * pairs - the first pair is the training set, the second pair is the
-     * testing set. Within the training and testing pairs, the first DoubleMatrix
-     * is the sample data, while the second DoubleMatrix are the ground truth
-     * values.
+     * DataSets - the first pair is the training set, the second pair is the
+     * testing set. 
      * 
      * @param percentage the percentage to put into the training set
-     * @return a pair of pairs, where the left is training, right is testing
+     * @return a pair of DataSets - left is training, right is testing
      */
-    protected Pair<Pair<DoubleMatrix, DoubleMatrix>, Pair<DoubleMatrix, DoubleMatrix>> split(int percentage) {
+    public Pair<DataSet, DataSet> splitSequentially(int percentage) {
         int trainStart = 0; 
         int trainEnd = (int)((percentage / 100.0) * (float)mSamples.rows);
         int testStart = trainEnd;
@@ -324,9 +256,9 @@ public class DataSet {
             trainingTruth = copyRows(trainStart, trainEnd, mTruth);
             testingTruth = copyRows(testStart, testEnd, mTruth);
         }
-        Pair<DoubleMatrix, DoubleMatrix> trainingPair = Pair.of(trainingSamples, trainingTruth);
-        Pair<DoubleMatrix, DoubleMatrix> testingPair = Pair.of(testingSamples, testingTruth);
-        return Pair.of(trainingPair, testingPair);
+        DataSet trainingSet = new DataSet(sHasTruth, trainingSamples, trainingTruth);
+        DataSet testingSet = new DataSet(sHasTruth, testingSamples, testingTruth);
+        return Pair.of(trainingSet, testingSet);
     }
     
     /**
@@ -335,8 +267,6 @@ public class DataSet {
      * @return a duplicate of this DataSet
      */
     public DataSet dup() {
-        return new DataSet(mTrainingSamples.dup(), mTrainingTruth.dup(),
-            mTestingSamples.dup(), mTestingTruth.dup(), sHasTruth,
-            mSamples.dup(), mTruth.dup());
+        return new DataSet(sHasTruth, mSamples.dup(), mTruth.dup());
     }
 }

@@ -84,8 +84,8 @@ public class TestPrediction {
         });
         
         DataSet mockDataSet = mock(DataSet.class);
-        when(mockDataSet.getTestingSet()).thenReturn(samples);
-        when(mockDataSet.getTestingTruth()).thenReturn(truth);
+        when(mockDataSet.getSamples()).thenReturn(samples);
+        when(mockDataSet.getTruth()).thenReturn(truth);
         
         NeuralNetwork mockNeuralNetwork = mock(NeuralNetwork.class);
         when(mockNeuralNetwork.predict(samples)).thenReturn(predictions);
