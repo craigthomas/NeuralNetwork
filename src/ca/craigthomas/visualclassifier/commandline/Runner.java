@@ -29,7 +29,6 @@ public class Runner {
     // The set of sub-commands that the user can specify 
     @Argument(handler=SubCommandHandler.class)
     @SubCommands({
-        @SubCommand(name="collect", impl=CollectCommand.class),
         @SubCommand(name="train", impl=TrainCommand.class),
     })
     Command command;
@@ -51,6 +50,7 @@ public class Runner {
             System.err.println(e.getMessage());
             System.err.println("java -jar " + PROGRAM_NAME + " [options...] arguments...");
             parser.printUsage(System.err);
+            System.exit(-1);
         }
     }
 }

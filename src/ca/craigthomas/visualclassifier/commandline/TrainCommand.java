@@ -225,10 +225,11 @@ public class TrainCommand extends Command {
             LOGGER.log(Level.INFO, "randomizing dataset");
             mDataSet.randomize();
             LOGGER.log(Level.INFO, "generating training and testing sets");
-            Pair<DataSet, DataSet> split = mDataSet.splitSequentially(mSplit);
+            Pair<DataSet, DataSet> split = mDataSet.splitEqually(mSplit);
             DataSet trainingData = split.getLeft();
             DataSet testingData = split.getRight();
-            LOGGER.log(Level.INFO, "training neural network...");            
+            LOGGER.log(Level.INFO, "training neural network...");   
+            trainingData.randomize();
             Trainer trainer = new Trainer.Builder(layerSizes, trainingData).maxIterations(mIterations).heartBeat(mHeartBeat).learningRate(mLearningRate).lambda(mLambda).build();
             trainer.train();
             

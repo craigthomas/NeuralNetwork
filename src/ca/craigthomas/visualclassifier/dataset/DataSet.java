@@ -9,10 +9,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jblas.DoubleMatrix;
+
+import ca.craigthomas.visualclassifier.commandline.Runner;
 
 /**
  * The DataSet class is used to read data from various sources. The DataSet
@@ -23,6 +26,9 @@ import org.jblas.DoubleMatrix;
  */
 public class DataSet {
     
+    // The logger for the class
+    private final static Logger LOGGER = Logger.getLogger(Runner.class.getName());
+
     private DoubleMatrix mSamples;
     private DoubleMatrix mTruth;
     private final boolean sHasTruth;
@@ -238,7 +244,10 @@ public class DataSet {
      * upon the percentage. For example, a percentage of 60 would allocate 
      * 60% to the training set and 40% to the testing set. Returns a pair of 
      * DataSets - the first pair is the training set, the second pair is the
-     * testing set. 
+     * testing set. To build the training set, will take the first 60% of the
+     * data starting at row 0. The remainder will be shunted to teh testing set.
+     * Use splitEqually if you wish to maintain an equal balance between the
+     * positive and negative classes when constructing a training data set.
      * 
      * @param percentage the percentage to put into the training set
      * @return a pair of DataSets - left is training, right is testing
@@ -259,6 +268,78 @@ public class DataSet {
         DataSet trainingSet = new DataSet(sHasTruth, trainingSamples, trainingTruth);
         DataSet testingSet = new DataSet(sHasTruth, testingSamples, testingTruth);
         return Pair.of(trainingSet, testingSet);
+    }
+    
+    /**
+     * Splits a DataSet into two sets - a training and a testing set - based
+     * upon the percentage. For example, a percentage of 60 would allocate 
+     * 60% to the training set and 40% to the testing set. Returns a pair of 
+     * DataSets - the first pair is the training set, the second pair is the
+     * testing set. Ensures that half of the examples in the training set are
+     * positive cases, and half of the examples in the training set are negative
+     * cases. If there are not enough positive or negative samples to build
+     * an equal training DataSet, then fall back to splitSequentially. 
+     *  
+     * @param percentage the percentage split to make
+     * @return the training DataSet, and the testing DataSet
+     */
+    public Pair<DataSet, DataSet> splitEqually(int percentage) {
+        boolean selectedRows [] = new boolean [mSamples.rows];
+        int half = (int)(((percentage / 100.0) * (float)mSamples.rows) / 2);
+        int negCounter = 0;
+        int posCounter = 0;
+        
+        // First, make sure that the data set has at least 'half' number of
+        // negative and positive samples - if we don't have it, default to 
+        // splitSequentially.
+        for (int index = 0; index < mTruth.rows; index++) {
+            if (mTruth.get(index, 0) == 1.0) {
+                posCounter++;
+            } else {
+                negCounter++;
+            }
+        }
+        
+        if (negCounter < half || posCounter < half) {
+            LOGGER.warning("cannot split DataSet equally (" + posCounter + " pos, " + negCounter + " neg, want " + half + ")");
+            return splitSequentially(percentage);
+        }
+        
+        posCounter = 0;
+        negCounter = 0;
+        DataSet trainingData = new DataSet(sHasTruth);
+        DataSet testingData = new DataSet(sHasTruth);
+        
+        // Select an index at random and see if we have already added it to
+        // the training DataSet. Loop until we have the desired number of
+        // positive and negative cases
+        while (negCounter < half && posCounter < half) {
+            int nextIndex = mRandom.nextInt(mSamples.rows);
+            if (!selectedRows[nextIndex]) {
+                DoubleMatrix row = DoubleMatrix.concatHorizontally(mSamples.getRow(nextIndex), mTruth.getRow(nextIndex));
+                if (mTruth.get(nextIndex, 0) == 1.0 && posCounter < half) {
+                    selectedRows[nextIndex] = true;
+                    posCounter++;
+                    trainingData.addSample(row);
+                }
+                
+                if (mTruth.get(nextIndex, 0) == 0.0 && negCounter < half) {
+                    selectedRows[nextIndex] = true;
+                    negCounter++;
+                    trainingData.addSample(row);
+                }
+            }
+        }
+        
+        // Take all the remaining unused samples, and include them in the
+        // testing DataSet.
+        for (int index = 0; index < selectedRows.length; index++) {
+            if (!selectedRows[index]) {
+                DoubleMatrix row = DoubleMatrix.concatHorizontally(mSamples.getRow(index), mTruth.getRow(index));
+                testingData.addSample(row);
+            }
+        }
+        return Pair.of(trainingData, testingData);
     }
     
     /**

@@ -1,26 +1,23 @@
-# ML Deer Detector
+# Neural Network 
 
 [![Build Status](https://travis-ci.org/craigthomas/NeuralNetwork.svg?branch=master)](https://travis-ci.org/craigthomas/NeuralNetwork) [![Coverage Status](https://coveralls.io/repos/craigthomas/NeuralNetwork/badge.png)](https://coveralls.io/r/craigthomas/NeuralNetwork)
 
 
 ## What is it?
 
-This project represents a machine learning algorithm and support programs
-to detect the presence of deer within a picture. The project contains code
-to connect to an XBOX 360 Kinect and take pictures. The pictures are then
-passed through a trained machine learning algorithm that classifies whether
-a deer exists in the picture or not.
+This project contains an implementation of a Neural Network. The purpose of
+the network is to determine if a deer is in a photo. To make it work, you 
+must first `train` the network to recognize deer or other objects. Once
+trained, you can then feed the neural network other photos, and it will 
+attempt to find instances of the objects it knows about within those 
+photos.
 
-The project contains code to:
-
-* Train a machine learning model to detect an object within a set of pictures
-* Use the Kinect to determine if a picture contains the object
-
-For more information on the project, [read my blog posts on the
+For more information on the Deer Detector goal, [read my blog posts on the
 project](http://craigthomas.ca/blog/2014/08/04/deer-detection-with-machine-learning-part-1/)
 
-Some code has recently moved around. The code to take pictures with a Kinect
+Note: some code has recently moved around. The code to take pictures with a Kinect
 still exists, but has moved to a [new GitHub repo](https://github.com/craigthomas/KinectTimeLapse).
+To take pictures with a Raspberry Pi NOIR camera, see my [other GitHub repo](https://github.com/craigthomas/RPiDayNightCamera).
 
 
 ## License
