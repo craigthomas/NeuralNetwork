@@ -388,6 +388,156 @@ public class TestDataSet {
     }
     
     @Test
+    public void testSplitEquallyEvenNumberWorksCorrectly() {
+        mDataSet = new DataSet(true);
+        List<List<Double>> samples = new ArrayList<List<Double>>();
+        Double [] newList = new Double [] {11.0, 12.0, 1.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {21.0, 22.0, 1.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {31.0, 32.0, 1.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {41.0, 42.0, 1.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {61.0, 62.0, 0.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {71.0, 72.0, 0.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {81.0, 82.0, 0.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {91.0, 92.0, 0.0};
+        samples.add(Arrays.asList(newList));
+        mDataSet.addSamples(samples);
+        Pair<DataSet, DataSet> result = mDataSet.splitEqually(50);
+        
+        DoubleMatrix trainingSet = result.getLeft().getSamples();
+        DoubleMatrix testingSet = result.getRight().getSamples();
+        
+        DoubleMatrix trainingTruth = result.getLeft().getTruth();
+        DoubleMatrix testingTruth = result.getRight().getTruth();
+        
+        assertEquals(4, trainingSet.rows);
+        assertEquals(4, trainingTruth.rows);
+        assertEquals(4, testingSet.rows);
+        assertEquals(4, testingTruth.rows);
+    }
+    
+    @Test
+    public void testSplitEquallyOddNumberWorksCorrectly() {
+        mDataSet = new DataSet(true);
+        List<List<Double>> samples = new ArrayList<List<Double>>();
+        Double [] newList = new Double [] {11.0, 12.0, 1.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {21.0, 22.0, 1.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {31.0, 32.0, 1.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {41.0, 42.0, 1.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {51.0, 52.0, 1.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {61.0, 62.0, 0.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {71.0, 72.0, 0.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {81.0, 82.0, 0.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {91.0, 92.0, 0.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {101.0, 102.0, 0.0};
+        samples.add(Arrays.asList(newList));
+        mDataSet.addSamples(samples);
+        Pair<DataSet, DataSet> result = mDataSet.splitEqually(50);
+        
+        DoubleMatrix trainingSet = result.getLeft().getSamples();
+        DoubleMatrix testingSet = result.getRight().getSamples();
+        
+        DoubleMatrix trainingTruth = result.getLeft().getTruth();
+        DoubleMatrix testingTruth = result.getRight().getTruth();
+        
+        assertEquals(6, trainingSet.rows);
+        assertEquals(6, trainingTruth.rows);
+        assertEquals(4, testingSet.rows);
+        assertEquals(4, testingTruth.rows);
+    }
+    
+    @Test
+    public void testSplitEquallyFallsBackToSequentialWhenNotEnoughSamples() {
+        mDataSet = new DataSet(true);
+        List<List<Double>> samples = new ArrayList<List<Double>>();
+        Double [] newList = new Double [] {11.0, 12.0, 1.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {21.0, 22.0, 0.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {31.0, 32.0, 0.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {41.0, 42.0, 0.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {51.0, 52.0, 0.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {61.0, 62.0, 0.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {71.0, 72.0, 0.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {81.0, 82.0, 0.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {91.0, 92.0, 0.0};
+        samples.add(Arrays.asList(newList));
+        newList = new Double [] {101.0, 102.0, 0.0};
+        samples.add(Arrays.asList(newList));
+        mDataSet.addSamples(samples);
+        Pair<DataSet, DataSet> result = mDataSet.splitEqually(50);
+        
+        DoubleMatrix trainingSet = result.getLeft().getSamples();
+        DoubleMatrix testingSet = result.getRight().getSamples();
+        
+        DoubleMatrix trainingTruth = result.getLeft().getTruth();
+        DoubleMatrix testingTruth = result.getRight().getTruth();
+        
+        assertEquals(5, trainingSet.rows);
+        assertEquals(5, trainingTruth.rows);
+        assertEquals(5, testingSet.rows);
+        assertEquals(5, testingTruth.rows);
+        
+        DoubleMatrix expectedTrainingSet = new DoubleMatrix(new double [][] {
+                {11.0, 12.0},
+                {21.0, 22.0},
+                {31.0, 32.0},
+                {41.0, 42.0},
+                {51.0, 52.0}
+        });
+
+        DoubleMatrix expectedTrainingTruth = new DoubleMatrix(new double [][] {
+                {1.0},
+                {0.0},
+                {0.0},
+                {0.0},
+                {0.0}
+        });
+        
+        DoubleMatrix expectedTestingSet = new DoubleMatrix(new double [][] {
+                {61.0, 62.0},
+                {71.0, 72.0},
+                {81.0, 82.0},
+                {91.0, 92.0},
+                {101.0, 102.0}
+        });
+        
+        DoubleMatrix expectedTestingTruth = new DoubleMatrix(new double [][] {
+                {0.0},
+                {0.0},
+                {0.0},
+                {0.0},
+                {0.0}
+        });
+
+        Assert.assertArrayEquals(expectedTrainingSet.toArray(), trainingSet.toArray(), 0.0001);
+        Assert.assertArrayEquals(expectedTrainingTruth.toArray(), trainingTruth.toArray(), 0.0001);
+        Assert.assertArrayEquals(expectedTestingSet.toArray(), testingSet.toArray(), 0.0001);
+        Assert.assertArrayEquals(expectedTestingTruth.toArray(), testingTruth.toArray(), 0.0001);
+    }
+    
+    @Test
     public void testDupWorksCorrectly() {
         mDataSet = new DataSet(true);
         List<List<Double>> samples = new ArrayList<List<Double>>();

@@ -254,7 +254,7 @@ public class DataSet {
      */
     public Pair<DataSet, DataSet> splitSequentially(int percentage) {
         int trainStart = 0; 
-        int trainEnd = (int)((percentage / 100.0) * (float)mSamples.rows);
+        int trainEnd = (int)Math.ceil(((percentage / 100.0) * (float)mSamples.rows));
         int testStart = trainEnd;
         int testEnd = mSamples.rows;
         DoubleMatrix trainingSamples = copyRows(trainStart, trainEnd, mSamples);
@@ -285,7 +285,7 @@ public class DataSet {
      */
     public Pair<DataSet, DataSet> splitEqually(int percentage) {
         boolean selectedRows [] = new boolean [mSamples.rows];
-        int half = (int)(((percentage / 100.0) * (float)mSamples.rows) / 2);
+        int half = (int)Math.ceil(((percentage / 100.0) * (float)mSamples.rows) / 2);
         int negCounter = 0;
         int posCounter = 0;
         
@@ -301,7 +301,7 @@ public class DataSet {
         }
         
         if (negCounter < half || posCounter < half) {
-            LOGGER.warning("cannot split DataSet equally (" + posCounter + " pos, " + negCounter + " neg, want " + half + ")");
+            LOGGER.warning("cannot split DataSet equally (" + posCounter + " pos, " + negCounter + " neg, want " + half + " each)");
             return splitSequentially(percentage);
         }
         
@@ -313,7 +313,7 @@ public class DataSet {
         // Select an index at random and see if we have already added it to
         // the training DataSet. Loop until we have the desired number of
         // positive and negative cases
-        while (negCounter < half && posCounter < half) {
+        while (negCounter < half || posCounter < half) {
             int nextIndex = mRandom.nextInt(mSamples.rows);
             if (!selectedRows[nextIndex]) {
                 DoubleMatrix row = DoubleMatrix.concatHorizontally(mSamples.getRow(nextIndex), mTruth.getRow(nextIndex));
