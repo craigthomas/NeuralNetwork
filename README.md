@@ -1,6 +1,6 @@
 # ML Deer Detector
 
-[![Build Status](https://travis-ci.org/craigthomas/DeerDetector.svg?branch=master)](https://travis-ci.org/craigthomas/DeerDetector) [![Coverage Status](https://coveralls.io/repos/craigthomas/DeerDetector/badge.png)](https://coveralls.io/r/craigthomas/DeerDetector)
+[![Build Status](https://travis-ci.org/craigthomas/NeuralNetwork.svg?branch=master)](https://travis-ci.org/craigthomas/NeuralNetwork) [![Coverage Status](https://coveralls.io/repos/craigthomas/NeuralNetwork/badge.png)](https://coveralls.io/r/craigthomas/NeuralNetwork)
 
 
 ## What is it?
@@ -13,12 +13,14 @@ a deer exists in the picture or not.
 
 The project contains code to:
 
-* Take a set number of pictures with the Kinect camera
 * Train a machine learning model to detect an object within a set of pictures
 * Use the Kinect to determine if a picture contains the object
 
 For more information on the project, [read my blog posts on the
 project](http://craigthomas.ca/blog/2014/08/04/deer-detection-with-machine-learning-part-1/)
+
+Some code has recently moved around. The code to take pictures with a Kinect
+still exists, but has moved to a [new GitHub repo](https://github.com/craigthomas/KinectTimeLapse).
 
 
 ## License
@@ -52,41 +54,12 @@ The compiled Jar file will be placed in the `build/libs` directory.
 
 ## Running
 
-### libfreenect Drivers
-
-To actually connect to the Kinect, you will need to install the 
-libfreenect drivers for your platform. Most major Linux distributions
-provide compiled binaries in their software repositories. See
-[Open Kinect's Getting Started](http://openkinect.org/wiki/Getting_Started)
-page for more detailed installation instructions.
-
 ### Command Line Help
 
 There are several options available for the program. Running the jar
 with the `-h` option will display a helpful description of the options:
 
     java -jar build/libs/visualclassifier-0.1.jar -h
-
-### Collecting Data 
-
-The `collect` sub-command allows to you capture images for training.
-To take pictures of various objects, you can specify the number of pictures
-to take as well as a time delay between successive pictures. For example,
-to take 10 pictures:
-
-    java -jar build/libs/visualclassifier-0.1.jar collect -n 10
-
-To take 10 pictures with a delay of 5 seconds between each:
-
-    java -jar build/libs/visualclassifier-0.1.jar collect -n 10 -d 5
-
-To take a picture using the infrared camera:
-
-    java -jar build/libs/visualclassifier-0.1.jar collect -i
-
-Saving files to a different path:
-
-    java -jar build/libs/visualclassifier-0.1.jar collect -p /path/to/save/to
 
 
 ### Training the NeuralNetwork
@@ -151,8 +124,6 @@ will take on the name `fp` for False Positive, and `fn` for False Negative.
 
 ### Operational
 
-- Taking pictures with a delay and saving them as JPG files
-- Taking pictures using the IR camera and saving them as JPG files
 - The neural network classifier
 - The ability to train the neural network classifier
 - The neural network predictor
