@@ -41,7 +41,7 @@ public class DataSet {
      * @param samples the samples for the DataSet
      * @param truth the truth values for the DataSet
      */
-    private DataSet(boolean hasTruth, DoubleMatrix samples, DoubleMatrix truth)
+    public DataSet(boolean hasTruth, DoubleMatrix samples, DoubleMatrix truth)
     {
         mSamples = samples;
         mTruth = truth;

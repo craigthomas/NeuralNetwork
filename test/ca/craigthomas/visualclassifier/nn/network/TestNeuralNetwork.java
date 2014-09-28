@@ -7,7 +7,6 @@ package ca.craigthomas.visualclassifier.nn.network;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.lang.IllegalArgumentException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -15,8 +14,6 @@ import org.jblas.DoubleMatrix;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import ca.craigthomas.visualclassifier.nn.network.NeuralNetwork;
 
 public class TestNeuralNetwork {
 

@@ -16,6 +16,7 @@ import org.jblas.DoubleMatrix;
 import org.junit.Assert;
 import org.junit.Test;
 
+import ca.craigthomas.visualclassifier.dataset.DataSet;
 import ca.craigthomas.visualclassifier.nn.activation.HyperbolicTangent;
 import ca.craigthomas.visualclassifier.nn.activation.IActivationFunction;
 import ca.craigthomas.visualclassifier.nn.network.NeuralNetwork;
@@ -47,6 +48,49 @@ public class TestTrainer {
         }
 
         mTrainer = new Trainer.Builder(mLayerSizes, inputs, outputs)
+                .learningRate(0.001).maxIterations(10000).heartBeat(0)
+                .lambda(1.0).build();
+        mTrainer.train();
+
+        NeuralNetwork network = mTrainer.getNeuralNetwork();
+        for (int index = 0; index < 10; index++) {
+            double value = (double)random.nextInt(100) + 1;
+            if (value > 50.0) {
+                testInputs.put(index, 0, 1.0);
+                testOutputs.put(index, 0, 0.0);
+            } else {
+                testInputs.put(index, 0, 0.0);
+                testOutputs.put(index, 0, 1.0);
+            }
+        }
+        DoubleMatrix predictions = network.predict(testInputs);
+        Assert.assertArrayEquals(testOutputs.toArray(), predictions.toArray(), 0.15);
+    }
+    
+    @Test
+    // Test assumes that DataSet is working correctly!
+    public void testTrainerLearnNOTFunctionWithDataSet() {
+        Random random = new Random();
+        mLayerSizes = Arrays.asList(1, 1);
+        DoubleMatrix inputs = DoubleMatrix.ones(500, 1);
+        DoubleMatrix outputs = DoubleMatrix.ones(500, 1);
+        DoubleMatrix testInputs = DoubleMatrix.ones(10, 1);
+        DoubleMatrix testOutputs = DoubleMatrix.ones(10, 1);
+        
+        for (int index = 0; index < 500; index++) {
+            double value = (double)random.nextInt(100) + 1;
+            if (value > 50.0) {
+                inputs.put(index, 0, 0.0);
+                outputs.put(index, 0, 1.0);
+            } else {
+                inputs.put(index, 0, 1.0);
+                outputs.put(index, 0, 0.0);                
+            }
+        }
+        
+        DataSet dataSet = new DataSet(true, inputs, outputs);
+
+        mTrainer = new Trainer.Builder(mLayerSizes, dataSet)
                 .learningRate(0.001).maxIterations(10000).heartBeat(0)
                 .lambda(1.0).build();
         mTrainer.train();
