@@ -7,6 +7,7 @@ package ca.craigthomas.visualclassifier.nn.activation;
 import static org.junit.Assert.*;
 
 import org.jblas.DoubleMatrix;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -122,5 +123,19 @@ public class TestHyperbolicTangent {
                 assertEquals(expected.get(row, col), result.get(row, col), 0.00001);
             }
         }
+    }
+    
+    @Test
+    public void testHyperbolicTangentGradient() {
+        DoubleMatrix doubleMatrix = new DoubleMatrix(new double [][] {
+                {0.0, 1.0, -1.0, 5.0, -5.0}
+        });
+        
+        DoubleMatrix expected = new DoubleMatrix(new double [][] {
+                {1.0, 0.41997434, 0.41997434, 0.00018158, 0.00018158} 
+        });
+
+        DoubleMatrix result = mTanH.gradient(doubleMatrix);
+        Assert.assertArrayEquals(expected.toArray(), result.toArray(), 0.000001);
     }
 }

@@ -33,8 +33,24 @@ public class HyperbolicTangent implements IActivationFunction {
         return MatrixFunctions.tanh(input);
     }
     
+    /**
+     * Computes the gradient of the hyperbolic tangent function with the 
+     * specified input. The gradient is simply:
+     * 
+     *           1
+     *     -------------
+     *     cosh^2(input)
+     *     
+     *  Where cosh is the hyperbolic cosine.
+     *  
+     *  @param input the DoubleMatrix to use as input
+     *  @return the gradient of the hyperbolic tangent
+     */
     public DoubleMatrix gradient(DoubleMatrix input) {
-        return null;
+        DoubleMatrix result = MatrixFunctions.cosh(input);
+        result = result.muli(result);
+        DoubleMatrix ones = DoubleMatrix.ones(input.rows, input.columns);
+        return ones.divi(result);
     }
 
     /**
