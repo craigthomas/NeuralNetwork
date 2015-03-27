@@ -5,9 +5,13 @@
 
 ## What is it?
 
-This project contains an implementation of a Neural Network. The purpose of
-the network is to determine if a deer is in a photo. To make it work, you 
-must first `train` the network to recognize deer or other objects. Once
+This project implements a general purpose Neural Network. This particular
+implementation is used specifically for image recognition, however, it 
+can be applied to many other machine learning problems. 
+
+In the context of image recognition, the Neural Network was originally
+built to determine if a deer (or other wildlife) is in a photo. To make 
+it work, you must first `train` the network to recognize deer or other objects. Once
 trained, you can then feed the neural network other photos, and it will 
 attempt to find instances of the objects it knows about within those 
 photos.
