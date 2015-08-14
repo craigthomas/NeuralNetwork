@@ -1,6 +1,6 @@
 # Neural Network 
 
-[![Build Status](https://travis-ci.org/craigthomas/NeuralNetwork.svg?branch=master)](https://travis-ci.org/craigthomas/NeuralNetwork) [![Coverage Status](https://coveralls.io/repos/craigthomas/NeuralNetwork/badge.png?branch=master)](https://coveralls.io/r/craigthomas/NeuralNetwork?branch=master)
+[![Build Status](https://travis-ci.org/craigthomas/NeuralNetwork.svg?branch=master)](https://travis-ci.org/craigthomas/NeuralNetwork) [![Coverage Status](https://coveralls.io/repos/craigthomas/NeuralNetwork/badge.svg?branch=master)](https://coveralls.io/r/craigthomas/NeuralNetwork?branch=master)
 
 
 ## What is it?
