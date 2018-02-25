@@ -1,3 +1,4 @@
 language: java
+sudo: false
 after_success:
-  - gradle jacocoTestReport coveralls
+  - bash <(curl -s https://codecov.io/bash)
