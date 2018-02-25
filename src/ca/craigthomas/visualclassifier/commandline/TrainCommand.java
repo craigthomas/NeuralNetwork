@@ -16,7 +16,6 @@ import javax.imageio.ImageIO;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.math3.stat.StatUtils;
 import org.jblas.DoubleMatrix;
-import org.kohsuke.args4j.Option;
 
 import ca.craigthomas.visualclassifier.dataset.DataSet;
 import ca.craigthomas.visualclassifier.dataset.Prediction;
@@ -27,68 +26,18 @@ import ca.craigthomas.visualclassifier.nn.trainer.Trainer;
 /**
  * The TrainCommand is used to train a neural network based upon a number of
  * positive and negative examples. 
- * 
- * @author thomas
  */
-public class TrainCommand extends Command {
-
+public class TrainCommand
+{
     // The logger for the class
     private final static Logger LOGGER = Logger.getLogger(Runner.class.getName());
-
-    @Option(name="-b", usage="specifies heartbeat during training (default 100 iterations)")
-    private int mHeartBeat = 100;
-    
-    @Option(name="-l", usage="specifies learning rate (default 0.01)")
-    private double mLearningRate = 0.01;
-    
-    @Option(name="-c", usage="loads data from a CSV file")
-    private String mCSVFile = "";
-    
-    @Option(name="--color", usage="processes images in color")
-    private boolean mColor = false;
-    
-    @Option(name="-p", usage="specifies positive image directory")
-    private String mPositiveDir = "";
-    
-    @Option(name="-n", usage="specifies negative image directory")
-    private String mNegativeDir = "";
-    
-    @Option(name="-w", usage="ensure images have specified width in pixels (default 10)")
-    private int mRequiredWidth = 10;
-    
-    @Option(name="-h", usage="ensure images have specified height in pixels (default 10)")
-    private int mRequiredHeight = 10;
-    
-    @Option(name="--save", usage="save prediction results into specified directory")
-    private String mSaveDir = "";
-    
-    @Option(name="-s", usage="splits the data between training and testing (default 80 training)")
-    private int mSplit = 80;
-    
-    @Option(name="-t", usage="prediction threshold (default 0.5)")
-    private double mPredictionThreshold = 0.5;
-    
-    @Option(name="-f", usage="generate this many folds for cross-validation (default 1)")
-    private int mFolds = 1;
-    
-    @Option(name="-l1", usage="specifies number of neurons in first hidden layer (default 10)")
-    private int mLayer1 = 10;
-    
-    @Option(name="-l2", usage="specifies number of neurons in second hidden layer (default 0)")
-    private int mLayer2 = 0;
-    
-    @Option(name="-o", usage="specifies number of neurons in output layer (default 1)")
-    private int mOutputLayer = 1;
-    
-    @Option(name="--lambda", usage="specifies lambda value (default 1.0)")
-    private double mLambda = 1.0;
-    
-    @Option(name="-i", usage="number of iterations (default 500)")
-    private int mIterations = 500;
-     
+    // The underlying data set
     private DataSet mDataSet;
+    // The arguments passed to the command
+    TrainArguments arguments;
     
-    public TrainCommand() {
+    public TrainCommand(TrainArguments arguments) {
+        this.arguments = arguments;
     }
     
     /**
@@ -97,7 +46,7 @@ public class TrainCommand extends Command {
     public void loadFromCSV() {
         mDataSet = new DataSet(true);
         try {
-            mDataSet.addFromCSVFile(mCSVFile);
+            mDataSet.addFromCSVFile(arguments.csvFile);
             LOGGER.log(Level.INFO, "loaded " + mDataSet.getNumSamples() + " sample(s)");
         } catch(IOException e) {
             LOGGER.log(Level.SEVERE, e.getMessage());
@@ -118,10 +67,10 @@ public class TrainCommand extends Command {
             String filename = file.getAbsolutePath();
             Image image = new Image(filename);
             
-            if (image.getWidth() != mRequiredWidth || image.getHeight() != mRequiredHeight) {
-                LOGGER.log(Level.WARNING, "file " + filename + " not correct size, skipping (want " + mRequiredWidth + "x" + mRequiredHeight + ", got " + image.getWidth() + "x" + image.getHeight() + ")");
+            if (image.getWidth() != arguments.requiredWidth || image.getHeight() != arguments.requiredHeight) {
+                LOGGER.log(Level.WARNING, "file " + filename + " not correct size, skipping (want " + arguments.requiredWidth + "x" + arguments.requiredHeight + ", got " + image.getWidth() + "x" + image.getHeight() + ")");
             } else {
-                if (mColor) {
+                if (arguments.color) {
                     mDataSet.addSample(image.convertColorToMatrix(truth));
                 } else {
                     mDataSet.addSample(image.convertGrayscaleToMatrix(truth));                    
@@ -134,16 +83,16 @@ public class TrainCommand extends Command {
      * Loads up the files from the specified directories.
      */
     public void loadFromDirectories() {
-        File positiveDir = new File(mPositiveDir);
-        File negativeDir = new File(mNegativeDir);
+        File positiveDir = new File(arguments.positiveDir);
+        File negativeDir = new File(arguments.negativeDir);
         
         if (!positiveDir.isDirectory()) {
-            LOGGER.log(Level.SEVERE, "positives directory [" + mPositiveDir + "] is not a directory");
+            LOGGER.log(Level.SEVERE, "positives directory [" + arguments.positiveDir + "] is not a directory");
             return;
         }
     
         if (!negativeDir.isDirectory()) {
-            LOGGER.log(Level.SEVERE, "negatives directory [" + mNegativeDir + "] is not a directory");
+            LOGGER.log(Level.SEVERE, "negatives directory [" + arguments.negativeDir + "] is not a directory");
             return;
         }
         
@@ -163,41 +112,40 @@ public class TrainCommand extends Command {
     }
     
     public void saveResults(NeuralNetwork bestModel, DataSet bestFold) {
-        File directory = new File(mSaveDir);
+        File directory = new File(arguments.saveDir);
         if (!directory.isDirectory()) {
-            LOGGER.log(Level.SEVERE, "save directory [" + mSaveDir + "] is not a directory");
+            LOGGER.log(Level.SEVERE, "save directory [" + arguments.saveDir + "] is not a directory");
             return;
         }
         
-        Prediction predictions = new Prediction(bestModel, mPredictionThreshold);
+        Prediction predictions = new Prediction(bestModel, arguments.predictionThreshold);
         predictions.predict(bestFold);
         DoubleMatrix falsePositives = predictions.getFalsePositiveSamples();
         DoubleMatrix falseNegatives = predictions.getFalseNegativeSamples();
         for (int i = 0; i < falsePositives.rows; i++) {
-            Image image = new Image(falsePositives.getRow(i), mRequiredWidth, mRequiredHeight, mColor);
+            Image image = new Image(falsePositives.getRow(i), arguments.requiredWidth, arguments.requiredHeight, arguments.color);
             saveImage(image, directory, "fp" + (i+1) + ".png");
         }
         for (int i = 0; i < falseNegatives.rows; i++) {
-            Image image = new Image(falseNegatives.getRow(i), mRequiredWidth, mRequiredHeight, mColor);
+            Image image = new Image(falseNegatives.getRow(i), arguments.requiredWidth, arguments.requiredHeight, arguments.color);
             saveImage(image, directory, "fn" + (i+1) + ".png");
         }
     }
     
-    @Override
     public void execute() {
         NeuralNetwork bestModel = null;
         DataSet bestFold = null;
-        double [] tp = new double [mFolds];
-        double [] fp = new double [mFolds];
-        double [] tn = new double [mFolds];
-        double [] fn = new double [mFolds];
-        double [] precision = new double [mFolds];
-        double [] recall = new double [mFolds];
-        double [] f1 = new double [mFolds];
+        double [] tp = new double [arguments.folds];
+        double [] fp = new double [arguments.folds];
+        double [] tn = new double [arguments.folds];
+        double [] fn = new double [arguments.folds];
+        double [] precision = new double [arguments.folds];
+        double [] recall = new double [arguments.folds];
+        double [] f1 = new double [arguments.folds];
         double bestF1 = 0;
         
         // Step 1: create the dataset
-        if (!mCSVFile.isEmpty()) {
+        if (!arguments.csvFile.isEmpty()) {
             loadFromCSV();
         } else {
             loadFromDirectories();
@@ -209,33 +157,37 @@ public class TrainCommand extends Command {
         }
         
         // Step 2: Generate layer information
-        List<Integer> layerSizes = new ArrayList<Integer>();
+        List<Integer> layerSizes = new ArrayList<>();
         layerSizes.add(mDataSet.getNumColsSamples());
-        if (mLayer1 != 0) {
-            layerSizes.add(mLayer1);
+        if (arguments.layer1 != 0) {
+            layerSizes.add(arguments.layer1);
         }
-        if (mLayer2 != 0) {
-            layerSizes.add(mLayer2);
+        if (arguments.layer2 != 0) {
+            layerSizes.add(arguments.layer2);
         }
-        layerSizes.add(mOutputLayer);
+        layerSizes.add(arguments.outputLayer);
         
         // Step 3: generate the folds and train the model
-        for (int fold = 0; fold < mFolds; fold++) {
+        for (int fold = 0; fold < arguments.folds; fold++) {
             LOGGER.log(Level.INFO, "processing fold " + (fold+1));
             LOGGER.log(Level.INFO, "randomizing dataset");
             mDataSet.randomize();
             LOGGER.log(Level.INFO, "generating training and testing sets");
-            Pair<DataSet, DataSet> split = mDataSet.splitEqually(mSplit);
+            Pair<DataSet, DataSet> split = mDataSet.splitEqually(arguments.split);
             DataSet trainingData = split.getLeft();
             DataSet testingData = split.getRight();
             LOGGER.log(Level.INFO, "training neural network...");   
             trainingData.randomize();
-            Trainer trainer = new Trainer.Builder(layerSizes, trainingData).maxIterations(mIterations).heartBeat(mHeartBeat).learningRate(mLearningRate).lambda(mLambda).build();
+            Trainer trainer = new Trainer.Builder(layerSizes, trainingData)
+                    .maxIterations(arguments.iterations)
+                    .heartBeat(arguments.heartBeat)
+                    .learningRate(arguments.learningRate)
+                    .lambda(arguments.lambda).build();
             trainer.train();
             
             // Step 4: evaluate each model
             NeuralNetwork model = trainer.getNeuralNetwork();
-            Prediction prediction = new Prediction(model, mPredictionThreshold);
+            Prediction prediction = new Prediction(model, arguments.predictionThreshold);
             prediction.predict(testingData);
             System.out.println("True Positives " + prediction.getTruePositives());
             System.out.println("False Positives " + prediction.getFalsePositives());
@@ -260,7 +212,7 @@ public class TrainCommand extends Command {
         }
         
         // Step 6: save the best information to the specified directory
-        if (!mSaveDir.isEmpty()) {
+        if (!arguments.saveDir.isEmpty()) {
             saveResults(bestModel, bestFold);
         }
         
