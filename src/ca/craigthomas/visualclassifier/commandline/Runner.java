@@ -1,56 +1,49 @@
 /*
- * Copyright (C) 2014 Craig Thomas
+ * Copyright (C) 2014-2018 Craig Thomas
  * This project uses an MIT style license - see LICENSE for details.
  */
 package ca.craigthomas.visualclassifier.commandline;
 
-import java.io.IOException;
-
-import org.kohsuke.args4j.Argument;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.spi.SubCommand;
-import org.kohsuke.args4j.spi.SubCommandHandler;
-import org.kohsuke.args4j.spi.SubCommands;
+import com.beust.jcommander.JCommander;
 
 /**
  * The Runner class parses the command line, and determines what actual command
  * to run. The current commands supported are:
  * 
- *  collect - takes pictures using the camera or IR camera for training purposes
+ *  train - trains the neural network
  *  
- * @author thomas
  */
-public class Runner {
+public class Runner
+{
+    public static final String TRAIN_COMMAND = "train";
 
-    // The name of the generated class
-    private static final String PROGRAM_NAME = "visualclassifier.jar";
-
-    // The set of sub-commands that the user can specify 
-    @Argument(handler=SubCommandHandler.class)
-    @SubCommands({
-        @SubCommand(name="train", impl=TrainCommand.class),
-    })
-    Command command;
-    
     /**
      * Parse the command line options and execute the specified command.
      * 
      * @param argv the command line arguments
-     * @throws IOException
-     * @throws CmdLineException
      */
-    public static void main(String[] argv) throws IOException, CmdLineException {
-        Runner runner = new Runner();
-        CmdLineParser parser = new CmdLineParser(runner);
-        try {
-            parser.parseArgument(argv);
-            runner.command.execute();
-        } catch( CmdLineException e ) {
-            System.err.println(e.getMessage());
-            System.err.println("java -jar " + PROGRAM_NAME + " [options...] arguments...");
-            parser.printUsage(System.err);
-            System.exit(-1);
+    public static void main(String[] argv) {
+        TrainArguments trainArguments = new TrainArguments();
+        JCommander jCommander = JCommander.newBuilder()
+                .addCommand(TRAIN_COMMAND, trainArguments)
+                .build();
+        jCommander.setProgramName("visualclassifier");
+        jCommander.parse(argv);
+        String command = jCommander.getParsedCommand();
+
+        if (command == null) {
+            jCommander.usage();
+        } else {
+            switch (jCommander.getParsedCommand()) {
+                case TRAIN_COMMAND:
+                    TrainCommand tc = new TrainCommand(trainArguments);
+                    tc.execute();
+                    break;
+
+                default:
+                    jCommander.usage();
+                    break;
+            }
         }
     }
 }

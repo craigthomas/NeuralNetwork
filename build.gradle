@@ -16,8 +16,8 @@ repositories {
 }
 
 dependencies {
+    compile 'com.beust:jcommander:1.72'
     compile 'org.slf4j:slf4j-api:1.7.5'
-    compile 'args4j:args4j:2.0.29'
     compile 'org.boofcv:openkinect:0.17'
     compile 'org.jblas:jblas:1.2.3'
     compile 'org.apache.commons:commons-csv:1.0'
