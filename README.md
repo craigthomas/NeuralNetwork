@@ -1,6 +1,9 @@
 # Neural Network 
 
-[![Build Status](https://travis-ci.org/craigthomas/NeuralNetwork.svg?branch=master)](https://travis-ci.org/craigthomas/NeuralNetwork) [![Coverage Status](https://coveralls.io/repos/craigthomas/NeuralNetwork/badge.svg?branch=master)](https://coveralls.io/r/craigthomas/NeuralNetwork?branch=master)
+[![Build Status](https://travis-ci.org/craigthomas/NeuralNetwork.svg?branch=master)](https://travis-ci.org/craigthomas/NeuralNetwork) 
+[![Coverage Status](https://codecov.io/gh/craigthomas/NeuralNetwork/branch/master/graph/badge.svg)](https://codecov.io/gh/craigthomas/NeuralNetwork)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/8a03ba66560d42a6b64118240b1615f9)](https://www.codacy.com/app/craig-thomas/NeuralNetwork?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=craigthomas/NeuralNetwork&amp;utm_campaign=Badge_Grade)
+[![Dependency Status](https://dependencyci.com/github/craigthomas/NeuralNetwork/badge)](https://dependencyci.com/github/craigthomas/NeuralNetwork)
 
 
 ## What is it?
@@ -76,16 +79,22 @@ and you wish to use 80% of the data set for training, and 20% for testing:
     java -jar build/libs/visualclassifier-0.1.jar train -p /path/to/positives \
          -n /path/to/negatives -w 60 -h 60 -s 80
 
+#### Learning Rate
+
 You can also set the learning rate with `-l`:
 
     java -jar build/libs/visualclassifier-0.1.jar train -p /path/to/positives \
          -n /path/to/negatives -w 60 -h 60 -s 80 -l 0.001
+
+#### Iterations
 
 By default, the network trains for 500 iterations. You can change that with the
 `-i` option:
 
     java -jar build/libs/visualclassifier-0.1.jar train -p /path/to/positives \
          -n /path/to/negatives -w 60 -h 60 -s 80 -i 1000
+
+#### Heartbeat
 
 During training, you can have the network output periodic messages containing
 the cost for that iteration. This is known as a heartbeat. The heartbeat will
@@ -95,12 +104,16 @@ option. To display after 100 iterations:
     java -jar build/libs/visualclassifier-0.1.jar train -p /path/to/positives \
          -n /path/to/negatives -w 60 -h 60 -s 80 -h 100
 
+#### Cross Validation
+
 You can also use k-fold cross validation. You can specify the number of folds to
 randomly be built from the dataset with the `-f` option. For example, to perform
 10-fold cross validation:
 
     java -jar build/libs/visualclassifier-0.1.jar train -p /path/to/positives \
          -n /path/to/negatives -w 60 -h 60 -s 80 -f 10
+
+#### Layer Configuration
 
 You can specify the number of nodes (neurons) to use in each layer of the network,
 up to a maximum of 2 hidden layers with `-l1` for layer 1, and `-l2` for layer 2.
@@ -109,6 +122,8 @@ For example, to create a network with a hidden layer containing 20 nodes:
     java -jar build/libs/visualclassifier-0.1.jar train -p /path/to/positives \
          -n /path/to/negatives -w 60 -h 60 -s 80 -l1 20
 
+#### Prediction Threshold
+
 When making predictions, the network uses a threshold of 0.5. This means that 
 values over 0.5 will be predicted as positive, and under 0.5 will be predicted
 as negative. You can change the threshold with the `-t` option:
@@ -116,12 +131,14 @@ as negative. You can change the threshold with the `-t` option:
     java -jar build/libs/visualclassifier-0.1.jar train -p /path/to/positives \
          -n /path/to/negatives -w 60 -h 60 -s 80 -t 0.7
 
+#### False Positives and Negatives
+
 You can also save the false positive and false negative images to a sub-directory
 with the `--save` option. The directory must exist, and must be writable. Images
 will take on the name `fp` for False Positive, and `fn` for False Negative.
 
 
-## Current Status - September 15,2014
+## Current Status - September 15, 2014
 
 ### Operational
 

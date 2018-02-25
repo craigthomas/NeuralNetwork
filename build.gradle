@@ -1,15 +1,15 @@
 apply plugin: 'java'
-apply plugin: 'eclipse'
 apply plugin: 'jacoco'
-apply plugin: 'coveralls'
+apply plugin: 'application'
+apply plugin: 'com.github.johnrengelman.shadow'
 
+mainClassName = 'ca.craigthomas.visualclassifier.commandline.Runner'
 group = 'ca.craigthomas.visualclassifier'
-version = '0.1'
+version = '1.0'
 
-description = 'A simple machine learning visual classifier'
+description = 'A simple machine learning image classifier'
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
@@ -30,11 +30,12 @@ dependencies {
 
 buildscript {
     repositories {
+        jcenter()
         mavenCentral()
     }
- 
+
     dependencies {
-        classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:0.6.1'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
     }
 }
 
@@ -61,17 +62,12 @@ jacocoTestReport {
     }
 }
 
-jar {
-    manifest {
-        attributes 'Main-Class': 'ca.craigthomas.visualclassifier.commandline.Runner'
-    }
-
-    doFirst {
-        from (configurations.runtime.resolve().collect { it.isDirectory() ? it : zipTree(it) }) {
-            exclude 'META-INF/MANIFEST.MF'
-            exclude 'META-INF/*.SF'
-            exclude 'META-INF/*.DSA'
-            exclude 'META-INF/*.RSA'
-        }
-    }
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.5.1'
 }
+
+task stage {
+    dependsOn shadowJar
+}
+
+check.dependsOn jacocoTestReport
