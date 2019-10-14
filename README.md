@@ -1,10 +1,37 @@
 # Neural Network 
 
-[![Build Status](https://travis-ci.org/craigthomas/NeuralNetwork.svg?branch=master)](https://travis-ci.org/craigthomas/NeuralNetwork) 
-[![Coverage Status](https://codecov.io/gh/craigthomas/NeuralNetwork/branch/master/graph/badge.svg)](https://codecov.io/gh/craigthomas/NeuralNetwork)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/8a03ba66560d42a6b64118240b1615f9)](https://www.codacy.com/app/craig-thomas/NeuralNetwork?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=craigthomas/NeuralNetwork&amp;utm_campaign=Badge_Grade)
-[![Dependency Status](https://dependencyci.com/github/craigthomas/NeuralNetwork/badge)](https://dependencyci.com/github/craigthomas/NeuralNetwork)
+[![Build Status](https://img.shields.io/travis/craigthomas/NeuralNetwork?style=flat-square)](https://travis-ci.org/craigthomas/NeuralNetwork) 
+[![Coverage Status](https://img.shields.io/codecov/c/gh/craigthomas/NeuralNetwork?style=flat-square)](https://codecov.io/gh/craigthomas/NeuralNetwork)
+[![Codacy Badge](https://img.shields.io/codacy/grade/8a03ba66560d42a6b64118240b1615f9?style=flat-square)](https://www.codacy.com/app/craig-thomas/NeuralNetwork?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=craigthomas/NeuralNetwork&amp;utm_campaign=Badge_Grade)
+[![Dependencies](https://img.shields.io/librariesio/github/craigthomas/NeuralNetwork?style=flat-square)](https://libraries.io/github/craigthomas/NeuralNetwork)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 
+## Table of Contents
+
+1. [What is it?](#what-is-it)
+2. [License](#license)
+3. [Compiling](#compiling)
+4. [Running](#running)
+    1. [Command Line Help](#command-line-help)
+    2. [Training the NeuralNetwork](#training-the-neuralnetwork)
+    3. [Learning Rate](#learning-rate)
+    4. [Iterations](#iterations)
+    5. [Heartbeat](#heartbeat)
+    6. [Cross Validation](#cross-validation)
+    7. [Layer Configuration](#layer-configuration)
+    8. [Prediction Threshold](#prediction-threshold)
+    9. [False Positives and Negatives](#false-positives-and-negatives)
+5. [Current Status](#current-status)
+    1. [Operational](#operational)
+    2. [Yet to be Implemented](#yet-to-be-implemented)
+6. [Third Party Licenses and Attributions](#third-party-licenses-and-attributions)
+    1. [args4j](#args4j)
+    2. [JBlas](#jblas)
+    3. [BoofCV](#boofcv)
+    4. [Apache Commons CSV](#apache-commons-csv)
+    5. [Apache Commons IO](#apache-commons-io)
+    6. [Apache Commons Lang](#apache-commons-lang)
+    7. [Apache Commons Math](#apache-commons-math)
 
 ## What is it?
 
@@ -38,11 +65,13 @@ software components.
 
 ## Compiling
 
-Simply copy the source files to a directory of your choice. In addition
-to the source, you will need the following required software packages:
-
-* [Java JDK 7](http://www.oracle.com/technetwork/java/javase/downloads/index.html) 1.7.0 u51 or later
-* [OpenKinect libfreenect](http://openkinect.org/wiki/Getting_Started)
+To compile the project, you will need a Java Development Kit (JDK) version 8 or greater installed. 
+Recently, Oracle has changed their license agreement to make personal and developmental use of their 
+JDK free. However, some other use cases may require a paid subscription. Oracle's version of the 
+JDK can be downloaded [here](https://www.oracle.com/technetwork/java/javase/downloads/index.html). 
+Alternatively, if you prefer to use a JRE with an open-source license (GPL v2 with Classpath 
+Exception), you may visit [https://adoptopenjdk.net](https://adoptopenjdk.net) and install the 
+latest Java Development Kit (JDK) for your system. Again, JDK version 8 or better will work correctly.
 
 To build the project, switch to the root of the source directory, and
 type:
@@ -53,7 +82,8 @@ On Windows, switch to the root of the source directory, and type:
 
     gradlew.bat build
 
-The compiled Jar file will be placed in the `build/libs` directory.
+The compiled JAR file will be placed in the `build/libs` directory, as a file called
+`neuralnetwork-1.0-all.jar`.
 
 
 ## Running
@@ -138,7 +168,9 @@ with the `--save` option. The directory must exist, and must be writable. Images
 will take on the name `fp` for False Positive, and `fn` for False Negative.
 
 
-## Current Status - September 15, 2014
+## Current Status
+
+The status marked below is current as of September 15, 2014.
 
 ### Operational
 
