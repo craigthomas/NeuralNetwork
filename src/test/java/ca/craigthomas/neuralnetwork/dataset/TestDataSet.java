@@ -7,6 +7,7 @@ package ca.craigthomas.neuralnetwork.dataset;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,7 +34,7 @@ public class TestDataSet {
         sampleFilename = sampleFile.getPath();
     }
     
-    @Test (expected= FileNotFoundException.class)
+    @Test (expected= NoSuchFileException.class)
     public void testReadFromNonExistentCSV() throws IOException {
         dataSet = new DataSet(true);
         dataSet.addFromCSVFile(BAD_FILENAME);
